@@ -13,6 +13,9 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/DataAsset.h"
 #include "DataAssets/ParkourPDA.h"
+#include "GameFramework/Actor.h"
+#include "Engine/EngineTypes.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "ParkourComponent.generated.h"
 
 

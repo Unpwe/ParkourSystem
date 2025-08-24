@@ -27,7 +27,13 @@ public class ParkourSystem : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-                "Core", "CoreUObject", "Engine", "InputCore","EnhancedInput", "GameplayTags", "MotionWarping"
+                "Core", 
+				"CoreUObject", 
+				"Engine", 
+				"InputCore",
+				"EnhancedInput",
+				"GameplayTags",
+				"MotionWarping"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
