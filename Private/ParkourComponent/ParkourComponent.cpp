@@ -65,12 +65,15 @@ void UParkourComponent::SetInitializeReference(ACharacter* Character, UCapsuleCo
 			ArrowActor->AttachToComponent(Mesh, FAttachmentTransformRules::KeepRelativeTransform);
 			ArrowActor->SetActorRelativeLocation(FVector(ArrowLocation.X, 0.f, ArrowLocation.Y - CharacterHeightDiff));
 			ArrowActor->SetActorRelativeRotation(FRotator(0.f, 90.f, 0.f));
+			ArrowActor->SetActorHiddenInGame(true);
 		}
 		else
 		{
 			UPSFunctionLibrary::CrashLog(TEXT("Can't find ArrowActor"), TEXT("Can't find ArrowActor"));
 		}
 
+		AnimInstance->OnMontageBlendingOut.AddDynamic(this, &UParkourComponent::BlendingOut_SetParkourState);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &UParkourComponent::ParkourMontageEnded);
 	}
 
 	if (ParkourCameraLerpCurve)
@@ -111,7 +114,8 @@ void UParkourComponent::PlayParkourCallable()
 	if (!OwnerCharacter || !CharacterMovement)
 		return;
 
-	ParkourAction();
+	if(bCanParkour && CapsuleComponent->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics)
+		ParkourAction();
 }
 
 
@@ -870,8 +874,7 @@ void UParkourComponent::SetParkourAction(FGameplayTag NewParkourActionTag)
 		{
 			ResetParkourHitResult();
 			return;
-		}
-				
+		}			
 
 #ifdef DEBUG_PARKOURCOMPONENT
 		LOG(Warning, TEXT("------Action------"));
@@ -888,7 +891,7 @@ void UParkourComponent::SetParkourAction(FGameplayTag NewParkourActionTag)
 			return;
 		}
 		
-		//ParkourVariables = ParkourDataAssets[ParkourGameplayEnum]->GetDefaultObject<UParkourPDA>();
+
 		class UParkourPDA* ParkourPDA = ParkourDataAssets[ParkourGameplayEnum]->GetDefaultObject<UParkourPDA>();
 		ParkourVariables = ParkourPDA->GetParkourDataAsset(GetCharacterState());
 
@@ -907,13 +910,15 @@ void UParkourComponent::PlayParkourMontage()
 		LOG(Warning, TEXT("OwnerCharacter, AnimInstance Can't Find"));
 		return;
 	}
-		
+
 
 	// 파쿠르 몽타주를 실행하면서 스테이트 변경
 	// ParkourInState -> 해당 몽타주의 상태
 	// ParkourInOut -> 몽타주가 끝나면 돼야할 상태 
 	// ex)In : Matle -> Out : NotBusy / in : ReachLedge -> Out :Climb
 	SetParkourState(ParkourVariables.ParkourInState);
+
+	bCanParkour = false; // 파쿠르 실행중
 
 	// Play MotionWarping
 	MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("ParkourTop"),
@@ -933,8 +938,7 @@ void UParkourComponent::PlayParkourMontage()
 
 
 	AnimInstance->Montage_Play(ParkourVariables.ParkourMontage, 1.f, EMontagePlayReturnType::MontageLength, MontageStartTime);
-	if (!AnimInstance->OnMontageBlendingOut.IsAlreadyBound(this, &UParkourComponent::BlendingOut_SetParkourState))
-		AnimInstance->OnMontageBlendingOut.AddDynamic(this, &UParkourComponent::BlendingOut_SetParkourState);
+	
 }
 
 // Parkour State에 따른 Movement Component 상태 변화
@@ -1147,7 +1151,13 @@ void UParkourComponent::BlendingOut_SetParkourState(UAnimMontage* animMontage, b
 	// ParkourOutState
 	// 블렌딩 아웃을 하면서 몽타주가 끝나면서 변경해야할 Parkour State 변경
 	SetParkourState(ParkourVariables.ParkourOutState);
-	SetParkourAction(TEXT("Parkour.Action.NoAction"));
+	SetParkourAction(TEXT("Parkour.Action.NoAction"));	
+	bCanParkour = true;
+}
+
+void UParkourComponent::ParkourMontageEnded(UAnimMontage* animMontage, bool bInterrupted)
+{
+	
 }
 
 
@@ -3863,9 +3873,9 @@ bool UParkourComponent::IsLedgeValid()
 
 ECharacterState UParkourComponent::GetCharacterState()
 {
-	if (CharacterMovement->Velocity.Size() >= ChatacterSprintSpeed)
+	if (CharacterMovement->Velocity.Size() >= SprintTypeParkour_Speed)
 		return ECharacterState::Sprint;
-	else if (CharacterMovement->Velocity.Size() >= ChatacterWalkingSpeed)
+	else if (CharacterMovement->Velocity.Size() >= WalkingTypeParkour_Speed)
 		return ECharacterState::Walking;
 	else
 		return ECharacterState::Idle;
@@ -3873,12 +3883,12 @@ ECharacterState UParkourComponent::GetCharacterState()
 
 void UParkourComponent::SetCharacterSprintSpeed(float Speed)
 {
-	ChatacterSprintSpeed = Speed;
+	SprintTypeParkour_Speed = Speed;
 }
 
 void UParkourComponent::SetCharacterWalkingSpeed(float Speed)
 {
-	ChatacterWalkingSpeed = Speed;
+	WalkingTypeParkour_Speed = Speed;
 }
 
 

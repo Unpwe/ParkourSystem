@@ -69,10 +69,10 @@ public:
 	---------------------*/
 	/* 사용자가 반드시 설정해야하는 함수  */	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus")
-	float ChatacterSprintSpeed = 500.f;
+	float SprintTypeParkour_Speed = 400.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus")
-	float ChatacterWalkingSpeed = 300.f;
+	float WalkingTypeParkour_Speed = 300.f;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InitializeValus")
@@ -83,6 +83,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus")
 	bool bAutoClimb = false;
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus")
 	FVector CheckInGroundSize = FVector(30.f, 30.f, 30.f);
@@ -132,7 +134,7 @@ public:
 	float CheckParkourDepthCnt = 8; // 기본 상태 체크 할 Trace Depth 갯수 * 20.f을 한다.
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|Custom Check Parkour Trace", meta = (ClampMin = 100, ClampMax = 300))
-	int32 CheckParkourDistance = 170;
+	int32 CheckParkourDistance = 200;
 
 
 	/*---------------------------------------------------------------------------------------
@@ -713,9 +715,15 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InitializeValus", meta = (AllowPrivateAccess = "true"))
 	int32 CheckParkourClimbHeight;
 
+
+
 	/*------------------
 			Bool
 	--------------------*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Bool, meta = (AllowPrivateAccess = "true"))
+	bool bCanParkour = true; // 파쿠르 가능상태
+
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Bool, meta = (AllowPrivateAccess = "true"))
 	bool bCanManuelClimb;// 직접 Climb 실행
 
@@ -978,10 +986,12 @@ private:
 	void LerpCameraPositionFinish();
 
 	/*-----------------------------------------------------------
-			OnMontageBlendingOut AddDynamic 
+			OnMontage AddDynamic 
 	-------------------------------------------------------------*/
 	UFUNCTION()
 	void BlendingOut_SetParkourState(UAnimMontage* animMontage, bool bInterrupted);
+	UFUNCTION()
+	void ParkourMontageEnded(UAnimMontage* animMontage, bool bInterrupted);
 
 
 	/*-------------------------------------------------------
