@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "FunctionLibrary/PSFunctionLibrary.h"
@@ -154,10 +154,10 @@ EParkourGameplayTagNames UPSFunctionLibrary::ConvertFNameToParkourTagsEnum(FName
 {
 	UEnum* ParkourTypeEnum = StaticEnum<EParkourGameplayTagNames>();
 
-	// EnumÀÇ ¸ğµç °ªÀ» ¼øÈ¸ÇÏ¸ç FName°ú ºñ±³
+	// Enumì˜ ëª¨ë“  ê°’ì„ ìˆœíšŒí•˜ë©° FNameê³¼ ë¹„êµ
 	for (int32 i = 0; i < ParkourTypeEnum->NumEnums(); i++)
 	{
-		// DisplayName °¡Á®¿À±â
+		// DisplayName ê°€ì ¸ì˜¤ê¸°
 		FString DisplayName = ParkourTypeEnum->GetDisplayNameTextByIndex(i).ToString();
 		if (FName(*DisplayName) == Name)
 			return static_cast<EParkourGameplayTagNames>(i);
@@ -184,10 +184,10 @@ void UPSFunctionLibrary::CheckTagName(FName TagName)
 {
 	UEnum* ParkourTypeEnum = StaticEnum<EParkourGameplayTagNames>();
 
-	// EnumÀÇ ¸ğµç °ªÀ» ¼øÈ¸ÇÏ¸ç FName°ú ºñ±³
+	// Enumì˜ ëª¨ë“  ê°’ì„ ìˆœíšŒí•˜ë©° FNameê³¼ ë¹„êµ
 	for (int32 i = 0; i < ParkourTypeEnum->NumEnums(); i++)
 	{
-		// DisplayName °¡Á®¿À±â
+		// DisplayName ê°€ì ¸ì˜¤ê¸°
 		FString DisplayName = ParkourTypeEnum->GetDisplayNameTextByIndex(i).ToString();
 		if (FName(*DisplayName) == TagName)
 			return;

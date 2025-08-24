@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -70,7 +70,7 @@ public:
 	/*-------------------
 		InitializeValus
 	---------------------*/
-	/* »ç¿ëÀÚ°¡ ¹İµå½Ã ¼³Á¤ÇØ¾ßÇÏ´Â ÇÔ¼ö  */	
+	/* ì‚¬ìš©ìê°€ ë°˜ë“œì‹œ ì„¤ì •í•´ì•¼í•˜ëŠ” í•¨ìˆ˜  */	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus")
 	float SprintTypeParkour_Speed = 400.f;
 
@@ -79,10 +79,10 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InitializeValus")
-	bool bAutoJump = false; // BP_AutoJump¸¦ ¾µ °ÍÀÎ°¡?
+	bool bAutoJump = false; // BP_AutoJumpë¥¼ ì“¸ ê²ƒì¸ê°€?
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InitializeValus")
-	bool bAlwaysParkour = false; 	// ParkourÀ» Play ParkourÀÌ ¾Æ´Ñ TickÀ¸·Î ÆÇ´Ü ÇÒ °ÍÀÎÁö
+	bool bAlwaysParkour = false; 	// Parkourì„ Play Parkourì´ ì•„ë‹Œ Tickìœ¼ë¡œ íŒë‹¨ í•  ê²ƒì¸ì§€
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus")
 	bool bAutoClimb = false;
@@ -125,23 +125,23 @@ public:
 
 
 	
-	/* °¡Àå Ã³À½ ¾Õ¿¡ ÀÖ´Â º®À» Check ÇÏ°Å³ª , Climb »óÅÂÀÏ ¶§ ÇöÀç »óÅÂ¿¡¼­ Ä³¸¯ÅÍÀÇ ZÃàÀ» ±âÁØÀ¸·Î ÇØ´ç ¼öÄ¡¸¸Å­ »«´Ù. 
-±× À§Ä¡ÀÇ ZÃàºÎÅÍ Trace¸¦ ÁøÇàÇÑ´Ù. */
+	/* ê°€ì¥ ì²˜ìŒ ì•ì— ìˆëŠ” ë²½ì„ Check í•˜ê±°ë‚˜ , Climb ìƒíƒœì¼ ë•Œ í˜„ì¬ ìƒíƒœì—ì„œ ìºë¦­í„°ì˜ Zì¶•ì„ ê¸°ì¤€ìœ¼ë¡œ í•´ë‹¹ ìˆ˜ì¹˜ë§Œí¼ ëº€ë‹¤. 
+ê·¸ ìœ„ì¹˜ì˜ Zì¶•ë¶€í„° Traceë¥¼ ì§„í–‰í•œë‹¤. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|Custom Check Parkour Trace", meta = (ClampMax = 0))
 	float CheckParkourFromCharacterRootZ = -60.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|Custom Check Parkour Trace", meta = (ClampMin = 5, ClampMax = 20))
-	float CheckParkourFallingHeightCnt = 15; // ¶³¾îÁú ¶§ Ã¼Å© ÇÒ Trace ³ôÀÌ °¹¼ö
+	float CheckParkourFallingHeightCnt = 15; // ë–¨ì–´ì§ˆ ë•Œ ì²´í¬ í•  Trace ë†’ì´ ê°¯ìˆ˜
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|Custom Check Parkour Trace", meta = (ClampMin = 5, ClampMax = 15))
-	float CheckParkourDepthCnt = 8; // ±âº» »óÅÂ Ã¼Å© ÇÒ Trace Depth °¹¼ö * 20.fÀ» ÇÑ´Ù.
+	float CheckParkourDepthCnt = 8; // ê¸°ë³¸ ìƒíƒœ ì²´í¬ í•  Trace Depth ê°¯ìˆ˜ * 20.fì„ í•œë‹¤.
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|Custom Check Parkour Trace", meta = (ClampMin = 100, ClampMax = 300))
 	int32 CheckParkourDistance = 200;
 
 
 	/*---------------------------------------------------------------------------------------
-		Vault¸¦ ±âÁØÀ¸·Î Parkour Action TypeÀÌ Á¤ÇØÁö±â ¶§¹®¿¡ ³ôÀÌ ÁöÁ¤
+		Vaultë¥¼ ê¸°ì¤€ìœ¼ë¡œ Parkour Action Typeì´ ì •í•´ì§€ê¸° ë•Œë¬¸ì— ë†’ì´ ì§€ì •
 	-----------------------------------------------------------------------------------------*/
 
 	// Vault Height
@@ -193,9 +193,9 @@ public:
 
 	/* IK Hnad */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Hand", meta = (ClampMin = -50f, ClampMax = 20f))
-	float ClimbIKHandSpace = -20.f; // Climb»óÅÂ¿¡¼­ ¼Õ »çÀÌÀÇ °ø°£
+	float ClimbIKHandSpace = -20.f; // Climbìƒíƒœì—ì„œ ì† ì‚¬ì´ì˜ ê³µê°„
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Hand")
-	float DirectionMovementSameHand = 0.f; // ÀÌµ¿¹æÇâ°ú ¼ÕÀÇ ¹æÇâÀÌ ÀÏÄ¡ÇÏ´Â °æ¿ì Ãß°¡ÀûÀ¸·Î ¹İ´ë¼Õº¸´Ù ´õ ¾Õ ÂÊÀ» °è»êÇÏ±â À§ÇÔ.
+	float DirectionMovementSameHand = 0.f; // ì´ë™ë°©í–¥ê³¼ ì†ì˜ ë°©í–¥ì´ ì¼ì¹˜í•˜ëŠ” ê²½ìš° ì¶”ê°€ì ìœ¼ë¡œ ë°˜ëŒ€ì†ë³´ë‹¤ ë” ì• ìª½ì„ ê³„ì‚°í•˜ê¸° ìœ„í•¨.
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Hand")
 	FName LeftIKHandSocketName = "ik_hand_l";
@@ -207,8 +207,8 @@ public:
 	FName RightHandSocketName = "hand_r";
 	
 	/*
-		IK¸¦ ÁøÇàÇÒ ¶§ º®ÀÇ ImpactNormal °ªÀ» ÀÌ¿ëÇÏ¿© ¼ÕÀÇ RotationÀ» ÁøÇàÇÏ±â ¶§¹®¿¡,
-		¾Ö´Ï¸ŞÀÌ¼Ç¸¶´Ù ¼ÕÀÇ È¸Àü °ªÀÌ ´Ù¸¦ ¼ö°¡ ÀÖÀ½À¸·Î Ä¿½ºÅÒ ÇÏ°Ô ¼öµ¿ ¼³Á¤
+		IKë¥¼ ì§„í–‰í•  ë•Œ ë²½ì˜ ImpactNormal ê°’ì„ ì´ìš©í•˜ì—¬ ì†ì˜ Rotationì„ ì§„í–‰í•˜ê¸° ë•Œë¬¸ì—,
+		ì• ë‹ˆë©”ì´ì…˜ë§ˆë‹¤ ì†ì˜ íšŒì „ ê°’ì´ ë‹¤ë¥¼ ìˆ˜ê°€ ìˆìŒìœ¼ë¡œ ì»¤ìŠ¤í…€ í•˜ê²Œ ìˆ˜ë™ ì„¤ì •
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InitializeValus|IK|Hand")
 	FRotator Additive_LeftClimbIKHandRotation = FRotator(90.f, 0.f, 270.f);
@@ -223,19 +223,19 @@ public:
 	FName RightIKFootSocketName = "ik_foot_r";
 
 	/* 
-		Hand À§Ä¡(¸ğ¼­¸®)¿¡¼­ ¾î´À¸¸Å­ ¾Æ·¡¿¡ À§Ä¡ÇÑ °÷¿¡ FootÀ» µÑ °ÍÀÎÁö ?
-		µÎ ¹ßÀ» µû·Î ¿ä±¸ÇÏ´Â ÀÌÀ¯´Â µÎ ¹ßÀÇ À§Ä¡°ªÀ» ´Ù¸£°ÔÇÏ¿© º¸´Ù ÀÚ¿¬½º·¯¿î ¾Ö´Ï¸ŞÀÌ¼Ç ¿¬ÃâÀ» À§ÇÔ.
+		Hand ìœ„ì¹˜(ëª¨ì„œë¦¬)ì—ì„œ ì–´ëŠë§Œí¼ ì•„ë˜ì— ìœ„ì¹˜í•œ ê³³ì— Footì„ ë‘˜ ê²ƒì¸ì§€ ?
+		ë‘ ë°œì„ ë”°ë¡œ ìš”êµ¬í•˜ëŠ” ì´ìœ ëŠ” ë‘ ë°œì˜ ìœ„ì¹˜ê°’ì„ ë‹¤ë¥´ê²Œí•˜ì—¬ ë³´ë‹¤ ìì—°ìŠ¤ëŸ¬ìš´ ì• ë‹ˆë©”ì´ì…˜ ì—°ì¶œì„ ìœ„í•¨.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Foot")
 	float LeftFootPositionToHand = -135.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Foot")
 	float RightFootPositionToHand = -125.f;
 
-	// Braced, FreeHangÀ» ÆÇ´ÜÇÏ°íÀÚ ÇÒ ¶§ ¼Õ¿¡¼­ºÎÅÍ ¾î´ÀÁ¤µµ À§Ä¡ÇÑ °÷À» °Ë»çÇÒ °ÍÀÎÁö.
+	// Braced, FreeHangì„ íŒë‹¨í•˜ê³ ì í•  ë•Œ ì†ì—ì„œë¶€í„° ì–´ëŠì •ë„ ìœ„ì¹˜í•œ ê³³ì„ ê²€ì‚¬í•  ê²ƒì¸ì§€.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Foot")
 	float CheckClimbBracedStyle = -125.f;
 
-	// IK FootÀÇ À§Ä¡ Á¶Á¤ (Forward/Backward)
+	// IK Footì˜ ìœ„ì¹˜ ì¡°ì • (Forward/Backward)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Foot")
 	float FootDepthOffset = -18.f;
 
@@ -264,7 +264,7 @@ public:
 	/*------------------------------------------
 		InitializeValus|Arrow Actor Location
 	-------------------------------------------*/
-	// ÇØ´ç ArrowActor¸¦ ÀÌ¿ëÇÏ¿© ClimbÇÒ¶§ WorldLocation°ªÀ» ¾ò¾î¿Â´Ù.
+	// í•´ë‹¹ ArrowActorë¥¼ ì´ìš©í•˜ì—¬ Climbí• ë•Œ WorldLocationê°’ì„ ì–»ì–´ì˜¨ë‹¤.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|ArrowActor")
 	FVector2D ArrowLocation = FVector2D(0.f, 195.f);
 
@@ -379,7 +379,7 @@ public:
 	/*-------------------------
 			Check Surface
 	--------------------------*/
-	// InGround »óÅÂ¸¦ ÆÇ´ÜÇÏ±â À§ÇØ Ä³¸¯ÅÍÀÇ ¹ß ¹ØÀÌ ¶¥¿¡ ´ê¾ÆÀÖ´ÂÁö È®ÀÎÇÏ±âÀ§ÇØ ZÃàÀ» ¾ó¸¶³ª ¾Æ·¡·Î ³»¸± °ÍÀÎÁö ÆÇ´ÜÇÏ´Â º¯¼ö
+	// InGround ìƒíƒœë¥¼ íŒë‹¨í•˜ê¸° ìœ„í•´ ìºë¦­í„°ì˜ ë°œ ë°‘ì´ ë•…ì— ë‹¿ì•„ìˆëŠ”ì§€ í™•ì¸í•˜ê¸°ìœ„í•´ Zì¶•ì„ ì–¼ë§ˆë‚˜ ì•„ë˜ë¡œ ë‚´ë¦´ ê²ƒì¸ì§€ íŒë‹¨í•˜ëŠ” ë³€ìˆ˜
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CheckParkour|CheckInGround", meta = (ClampMin = -30.f, ClampMax = 20.f))
 	float CheckAutoClimbToRoot = -10.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CheckParkour|CheckInGround", meta = (ClampMin = 0.f, ClampMax = 60.f))
@@ -410,7 +410,7 @@ public:
 	/*------------------------------------------
 		Pakrour Vault Velocity Length
 	--------------------------------------------*/
-	// Mantle°ú Vault µÑ´Ù °¡´ÉÇÑ »óÅÂ ÀÏ ¶§ ÇØ´ç ¼Óµµ ÀÌ»óÀÌ¸é Vault.
+	// Mantleê³¼ Vault ë‘˜ë‹¤ ê°€ëŠ¥í•œ ìƒíƒœ ì¼ ë•Œ í•´ë‹¹ ì†ë„ ì´ìƒì´ë©´ Vault.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PakrourVaultVelocityLength")
 	float Velocity_VaultMantle = 200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PakrourVaultVelocityLength")
@@ -438,7 +438,7 @@ public:
 	/*-------------------------------------------
 		Previous State Camera Setting
 	---------------------------------------------*/
-	// ÆÄÄí¸£ »óÅÂ º¯°æ½Ã Ä«¸Ş¶ó À§Ä¡ ¹× TargetArmLength ¿¬Ãâ
+	// íŒŒì¿ ë¥´ ìƒíƒœ ë³€ê²½ì‹œ ì¹´ë©”ë¼ ìœ„ì¹˜ ë° TargetArmLength ì—°ì¶œ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PreviousState Setting")
 	FVector ReachLedge_CameraLocation = FVector(-50.f, 0.f, 70.f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PreviousState Setting")
@@ -448,7 +448,7 @@ public:
 	/*---------------------------
 		Parkour State Settings
 	-----------------------------*/
-	// ParkourStateSettings ÇÔ¼ö¿¡¼­ ¹«ºê¸ÕÆ®ÀÇ È¸Àü¼Óµµ
+	// ParkourStateSettings í•¨ìˆ˜ì—ì„œ ë¬´ë¸Œë¨¼íŠ¸ì˜ íšŒì „ì†ë„
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParkourRotationRate")
 	FRotator ParkourRotationRate_Climb = FRotator(0.f, 0.f, 0.f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParkourRotationRate")
@@ -462,54 +462,54 @@ public:
 			Climb IK
 	------------------------*/
 	/*
-		Left Climb IK, Right Climb IK¿¡¼­ ¸Ç Ã³À½ Left, Right¸¦ Ã¼Å©ÇÒ ¶§
-		¾ó¸¸Å­ÀÇ ÆøÀ¸·Î °Ë»çÇÒ °ÍÀÎÁö.
+		Left Climb IK, Right Climb IKì—ì„œ ë§¨ ì²˜ìŒ Left, Rightë¥¼ ì²´í¬í•  ë•Œ
+		ì–¼ë§Œí¼ì˜ í­ìœ¼ë¡œ ê²€ì‚¬í•  ê²ƒì¸ì§€.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Width")
 	float CheckClimbForward = 20.f;
 
-	/* Ä³¸¯ÅÍÀÇ ³ôÀÌ, Ä³¸¯ÅÍÀÇ ¼Õ ³ôÀÌ¸¦ ¼öµ¿ÀûÀ¸·Î Á¶Àı */
-	// ÀÌ °ªÀÌ ¿Ã¶ó°¡¸é ¼öÄ¡ ¸¸Å­ Ä³¸¯ÅÍ°¡ ÆÄÄí¸£ÇÒ ¶§ À§·Î ¿Ã¶ó°¨
+	/* ìºë¦­í„°ì˜ ë†’ì´, ìºë¦­í„°ì˜ ì† ë†’ì´ë¥¼ ìˆ˜ë™ì ìœ¼ë¡œ ì¡°ì ˆ */
+	// ì´ ê°’ì´ ì˜¬ë¼ê°€ë©´ ìˆ˜ì¹˜ ë§Œí¼ ìºë¦­í„°ê°€ íŒŒì¿ ë¥´í•  ë•Œ ìœ„ë¡œ ì˜¬ë¼ê°
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings")
 	float CharacterHeightDiff = 0.f;
 
 
 	/* ClimbIK| Custom Settings| Hand */
 	
-	// ÀÌ °ªÀÌ ¿Ã¶ó°¡¸é ¼öÄ¡ ¸¸Å­ Ä³¸¯ÅÍ°¡ ÆÈÀÌ À§·Î ´õ ¿Ã¶ó°¨
+	// ì´ ê°’ì´ ì˜¬ë¼ê°€ë©´ ìˆ˜ì¹˜ ë§Œí¼ ìºë¦­í„°ê°€ íŒ”ì´ ìœ„ë¡œ ë” ì˜¬ë¼ê°
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Hand")
 	float CharacterHandUpDiff = 0.f;
 	
-	//ÀÌ °ªÀÌ ¿Ã¶ó°¡¸é ¼öÄ¡ ¸¸Å­ Ä³¸¯ÅÍ°¡ ¾ÕÀ¸·Î ÆÈÀ» ´õ »¸´Â´Ù.
+	//ì´ ê°’ì´ ì˜¬ë¼ê°€ë©´ ìˆ˜ì¹˜ ë§Œí¼ ìºë¦­í„°ê°€ ì•ìœ¼ë¡œ íŒ”ì„ ë” ë»—ëŠ”ë‹¤.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Hand")
 	float BracedHandFrontDiff = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Hand")
 	float FreeHangHandFrontDiff = 0.f;
 
-	// Climb »óÅÂ¿¡ µû¸¥ ¼Õ ³ôÀÌ Ãß°¡ ¼³Á¤
+	// Climb ìƒíƒœì— ë”°ë¥¸ ì† ë†’ì´ ì¶”ê°€ ì„¤ì •
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Hand")
 	float BracedHandMovementHeight = -7.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Hand")
 	float FreeHangHandMovementHeight = -9.f;
 	
-	// ¼Õ µÎ²² ¸¸Å­ °Å¸® Á¶Àı
+	// ì† ë‘ê»˜ ë§Œí¼ ê±°ë¦¬ ì¡°ì ˆ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Hand")
 	float CharacterHandThickness = 3.f;
 
 
 	/* ClimbIK| Custom Settings| Foot */
-	// Foot IK¸¦ ÇÒ ¶§ Foot IKÇÒ À§Ä¡¸¦ Ä³¸¯ÅÍÀÇ Å°°ª¿¡ ºñ·ÊÇÏ¿© Ä¿½ºÅÒÇÏ°Ô ¼öÁ¤
+	// Foot IKë¥¼ í•  ë•Œ Foot IKí•  ìœ„ì¹˜ë¥¼ ìºë¦­í„°ì˜ í‚¤ê°’ì— ë¹„ë¡€í•˜ì—¬ ì»¤ìŠ¤í…€í•˜ê²Œ ìˆ˜ì •
 	// ex) CharacterHeightDiff - CharacterFootIKLocation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Foot")
 	float CharacterFootIKLocation = 150.f;
 
-	// ClimbFootIK¿¡¼­ °¢°¢ RightVector¿¡ °ªÀ» Ãß°¡·Î »©°Å³ª ´õÇÏ¿© IKÇÏ´Â ¹ß À§Ä¡¸¦ ¼öµ¿ÀûÀ¸·Î ¼öÁ¤ °¡´É.
+	// ClimbFootIKì—ì„œ ê°ê° RightVectorì— ê°’ì„ ì¶”ê°€ë¡œ ë¹¼ê±°ë‚˜ ë”í•˜ì—¬ IKí•˜ëŠ” ë°œ ìœ„ì¹˜ë¥¼ ìˆ˜ë™ì ìœ¼ë¡œ ìˆ˜ì • ê°€ëŠ¥.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Foot")
 	float CharacterLeftFootLocation = 7.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Foot")
 	float CharacterFootLocation_Right = 9.f;
 
-	// Foot IK¸¦ ÇÒ ¶§ ¾Ö´Ï¸ŞÀÌ¼Ç ¹× ¹ß µÎ²²¸¦ °í·ÁÇÏ¿© ImpactPoint¿¡¼­ ¾î´ÀÁ¤µµ ¶³¾îÁø °÷¿¡ ¹ßÀ» °íÁ¤ ½ÃÅ³ °Í ÀÎÁö.
+	// Foot IKë¥¼ í•  ë•Œ ì• ë‹ˆë©”ì´ì…˜ ë° ë°œ ë‘ê»˜ë¥¼ ê³ ë ¤í•˜ì—¬ ImpactPointì—ì„œ ì–´ëŠì •ë„ ë–¨ì–´ì§„ ê³³ì— ë°œì„ ê³ ì • ì‹œí‚¬ ê²ƒ ì¸ì§€.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Foot")
 	float BracedFootAddThickness_Left = 17.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Custom Settings|Foot")
@@ -519,31 +519,31 @@ public:
 	/*-------------------
 			Drop
 	---------------------*/
-	// Climb »óÅÂ¿¡¼­ ParkourDrop ÇÔ¼ö°¡ ½ÇÇàµÇ¾úÀ»¶§ bCanManuelClimb º¯¼ö¸¦ true·Î ¼Â¾÷ ÇÒ Timer ½Ã°£À» Á¶Á¤ÇÏ´Â º¯¼ö
+	// Climb ìƒíƒœì—ì„œ ParkourDrop í•¨ìˆ˜ê°€ ì‹¤í–‰ë˜ì—ˆì„ë•Œ bCanManuelClimb ë³€ìˆ˜ë¥¼ trueë¡œ ì…‹ì—… í•  Timer ì‹œê°„ì„ ì¡°ì •í•˜ëŠ” ë³€ìˆ˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
 	float Drop_CanManuelClimbBecomesTrueTime = 0.3f;
-	// Ä³¸¯ÅÍÀÇ ¾Õ ÂÊ ¹ß ¹ØÀ» °Ë»çÇÒ¶§ »ç¿ëÇÔ. Ä³¸¯ÅÍÀÇ À§Ä¡°ª¿¡¼­ ÇØ´ç °ªÀ» »©¼­ Trace¸¦ ÁøÇà
+	// ìºë¦­í„°ì˜ ì• ìª½ ë°œ ë°‘ì„ ê²€ì‚¬í• ë•Œ ì‚¬ìš©í•¨. ìºë¦­í„°ì˜ ìœ„ì¹˜ê°’ì—ì„œ í•´ë‹¹ ê°’ì„ ë¹¼ì„œ Traceë¥¼ ì§„í–‰
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
 	float CheckCharacterDropHeight = -120.f;
-	// DropDownÀ» ½ÇÇàÇÒ¶§ Ä³¸¯ÅÍ È¸Àü°ªÀ» »ç¿ëÇÒÁö, ÄÁÆ®·Ñ·¯ È¸Àü°ªÀ» »ç¿ëÇÒ °ÍÀÎÁö.
+	// DropDownì„ ì‹¤í–‰í• ë•Œ ìºë¦­í„° íšŒì „ê°’ì„ ì‚¬ìš©í• ì§€, ì»¨íŠ¸ë¡¤ëŸ¬ íšŒì „ê°’ì„ ì‚¬ìš©í•  ê²ƒì¸ì§€.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Drop")
 	bool bUseControllerRotation_DropDown = false;
 
 	/*----------------------------
 		Climb Movement
 	-----------------------------*/
-	// Climb»óÅÂ¿¡¼­ ¿òÁ÷ÀÏ ¶§ ÄÁÆ®·Ñ·¯ÀÇ »ó´ëÀû ¹æÇâ¿¡µû¶ó ¿òÁ÷ÀÏ °ÍÀÎÁö
+	// Climbìƒíƒœì—ì„œ ì›€ì§ì¼ ë•Œ ì»¨íŠ¸ë¡¤ëŸ¬ì˜ ìƒëŒ€ì  ë°©í–¥ì—ë”°ë¼ ì›€ì§ì¼ ê²ƒì¸ì§€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|ClimbMovement")
 	bool bUseControllerRotation_Climb = false;
 
-	// ClimbMovement¿¡¼­ ÀÌµ¿ÇÒ¶§ °Å¸®Ã¼Å©
+	// ClimbMovementì—ì„œ ì´ë™í• ë•Œ ê±°ë¦¬ì²´í¬
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement")
 	float ClimbMovementDistance = 17.f;
 
-	// ClimbMovement¿¡¼­ ÀÌµ¿ÇÒ¶§ Ä³¸¯ÅÍÀÇ ÀÌµ¿¹æÇâ¿¡ Àå¾Ö¹°ÀÌ ÀÖ´ÂÁö Ã¼Å©ÇÒ °Å¸®
+	// ClimbMovementì—ì„œ ì´ë™í• ë•Œ ìºë¦­í„°ì˜ ì´ë™ë°©í–¥ì— ì¥ì• ë¬¼ì´ ìˆëŠ”ì§€ ì²´í¬í•  ê±°ë¦¬
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Obstacle")
 	float ClimbMovementObstacleCheckDistance = 13.f;
-	// Àå¾Ö¹°À» Ã¼Å©ÇÒ Capsule TraceÀÇ Å©±â
+	// ì¥ì• ë¬¼ì„ ì²´í¬í•  Capsule Traceì˜ í¬ê¸°
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Obstacle")
 	float CheckClimbMovementSurface_CapsuleTraceRadius = 5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Obstacle")
@@ -551,8 +551,8 @@ public:
 
 
 	/*
-		ClimbMovement¿¡¼­ ¿òÁ÷ÀÏ ¶§ ÃÖÁ¾ÀûÀ¸·Î ¿¬»êÀ» ³¡³½ À§Ä¡·Î Ä³¸¯ÅÍ¸¦ ¿òÁ÷ÀÌ·Á°í ÇÒ ¶§ÀÇ
-		ÇöÀç À§Ä¡°ª¿¡¼­ Target À§Ä¡À¸·Î ÀÌµ¿ÇÏ´Â º¸°£ ¼Óµµ
+		ClimbMovementì—ì„œ ì›€ì§ì¼ ë•Œ ìµœì¢…ì ìœ¼ë¡œ ì—°ì‚°ì„ ëë‚¸ ìœ„ì¹˜ë¡œ ìºë¦­í„°ë¥¼ ì›€ì§ì´ë ¤ê³  í•  ë•Œì˜
+		í˜„ì¬ ìœ„ì¹˜ê°’ì—ì„œ Target ìœ„ì¹˜ìœ¼ë¡œ ì´ë™í•˜ëŠ” ë³´ê°„ ì†ë„
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Interp Speed")
 	float ClimbStyleBracedInterpSpeed = 2.7f;
@@ -560,10 +560,10 @@ public:
 	float ClimbStyleFreeHangInterpSpeed = 1.8f;
 
 	/*
-	* CornerMove, ClimbMovement¿¡¼­ SetActorLocationAndRoationÀÌ³ª MoveComponentTo ÇÔ¼ö¸¦ È£Ãâ ÇÒ ¶§ ÇÊ¿äÇÑ º¯¼ö
-	* ·çÆ®¸ğ¼Ç ¸ùÅ¸ÁÖ ¾Ö´Ï¸ŞÀÌ¼ÇÀ» ½ÇÇàÇÏ¸é¼­ ¾Ö´Ï¸ŞÀÌ¼Ç ½ºÅ×ÀÌÆ® ¸Ó½ÅÀ¸·Î µ¹¾Æ°¥¶§,
-	* µÎ ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ¼¼Æ®°¡ ¾Æ´Ñ°æ¿ì ·çÆ® ¸ğ¼ÇÀÌ ´Ş¶ó¼­ À§Ä¡°ªÀÌ Æ²¾îÁú ¼ö°¡ ÀÖ´Âµ¥,
-	* ¾Ë¸ÂÀº ÀÚ¸®¿¡ ¾Ë¸Â°Ô ¾Ö´Ï¸ŞÀÌ¼Ç »óÅÂ¸¦ À§Ä¡ ½ÃÅ°±â À§ÇØ ¼öµ¿ÀûÀ¸·Î º¯°æÇÏ±âÀ§ÇÑ º¯¼ö
+	* CornerMove, ClimbMovementì—ì„œ SetActorLocationAndRoationì´ë‚˜ MoveComponentTo í•¨ìˆ˜ë¥¼ í˜¸ì¶œ í•  ë•Œ í•„ìš”í•œ ë³€ìˆ˜
+	* ë£¨íŠ¸ëª¨ì…˜ ëª½íƒ€ì£¼ ì• ë‹ˆë©”ì´ì…˜ì„ ì‹¤í–‰í•˜ë©´ì„œ ì• ë‹ˆë©”ì´ì…˜ ìŠ¤í…Œì´íŠ¸ ë¨¸ì‹ ìœ¼ë¡œ ëŒì•„ê°ˆë•Œ,
+	* ë‘ ì• ë‹ˆë©”ì´ì…˜ì´ ì„¸íŠ¸ê°€ ì•„ë‹Œê²½ìš° ë£¨íŠ¸ ëª¨ì…˜ì´ ë‹¬ë¼ì„œ ìœ„ì¹˜ê°’ì´ í‹€ì–´ì§ˆ ìˆ˜ê°€ ìˆëŠ”ë°,
+	* ì•Œë§ì€ ìë¦¬ì— ì•Œë§ê²Œ ì• ë‹ˆë©”ì´ì…˜ ìƒíƒœë¥¼ ìœ„ì¹˜ ì‹œí‚¤ê¸° ìœ„í•´ ìˆ˜ë™ì ìœ¼ë¡œ ë³€ê²½í•˜ê¸°ìœ„í•œ ë³€ìˆ˜
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Edit Location")
 	float ClimbStyleBracedXYPosition = -40.f;
@@ -581,17 +581,17 @@ public:
 	/*----------------------------------
 			Corner Movement
 	------------------------------------*/
-	/* Corner¸¦ µ¹¶§ ÇØ´ç ºÎºĞÀÇ À§Ä¡·Î Move Component To¸¦ ½ÇÇàÇÏ´Âµ¥,
-	TraceÇÏ¿© ¾Ë¾Æ³½ ¸ğ¼­¸®ÀÇ À§Ä¡¿¡¼­ ¾î´À¸¸Å­ÀÇ Height¸¦ »©¾ß ÇØ´ç À§Ä¡¿¡ Target Relative LocationÀ» ÇÏ¸é
-	Ä³¸¯ÅÍ°¡ ¾Ë¸Â°Ô ÀÌµ¿ ÇÒÁö Ä¿½ºÅÒÇÏ°Ô Á¶Àı ÇÒ¼ö ÀÖ´Â º¯¼ö
-	ÀÎ°£Çü ±âÁØ ¾à 100 ~ 107 (¾Ö´Ï¸ŞÀÌ¼Ç¸¶´Ù ´Ù¸¦¼ö ÀÖÀ½) */
+	/* Cornerë¥¼ ëŒë•Œ í•´ë‹¹ ë¶€ë¶„ì˜ ìœ„ì¹˜ë¡œ Move Component Toë¥¼ ì‹¤í–‰í•˜ëŠ”ë°,
+	Traceí•˜ì—¬ ì•Œì•„ë‚¸ ëª¨ì„œë¦¬ì˜ ìœ„ì¹˜ì—ì„œ ì–´ëŠë§Œí¼ì˜ Heightë¥¼ ë¹¼ì•¼ í•´ë‹¹ ìœ„ì¹˜ì— Target Relative Locationì„ í•˜ë©´
+	ìºë¦­í„°ê°€ ì•Œë§ê²Œ ì´ë™ í• ì§€ ì»¤ìŠ¤í…€í•˜ê²Œ ì¡°ì ˆ í• ìˆ˜ ìˆëŠ” ë³€ìˆ˜
+	ì¸ê°„í˜• ê¸°ì¤€ ì•½ 100 ~ 107 (ì• ë‹ˆë©”ì´ì…˜ë§ˆë‹¤ ë‹¤ë¥¼ìˆ˜ ìˆìŒ) */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|CornerMovement")
 	float CornerMovementHeight = 105.f;
 
 	/*
-		ÄÚ³Ê¸¦ µ¹¶§ CheckÇØ¾ßÇÏ´Â Ä³¸¯ÅÍÀÇ CapsuleSize
-		ÀÏÀÏÈ÷ ¼öµ¿À¸·Î Àû´Â ÀÌÀ¯´Â, Ä³¸¯ÅÍ¸¶³ª Climb ¾Ö´Ï¸ŞÀÌ¼ÇÇüÅÂ³ª Å©±â°¡ ´Ù¸¦ ¼ö ÀÖ±â ¶§¹®¿¡
-		ÇØ´ç Ä³¸¯ÅÍÀÇ Å©±â ¹× ¾Ö´Ï¸ŞÀÌ¼Ç ÇüÅÂ¿¡ µû¶ó ¾Ë¸Â´Â »çÀÌÁî¸¦ °Ë»çÇÏ±â À§ÇÔÀÌ´Ù.
+		ì½”ë„ˆë¥¼ ëŒë•Œ Checkí•´ì•¼í•˜ëŠ” ìºë¦­í„°ì˜ CapsuleSize
+		ì¼ì¼íˆ ìˆ˜ë™ìœ¼ë¡œ ì ëŠ” ì´ìœ ëŠ”, ìºë¦­í„°ë§ˆë‚˜ Climb ì• ë‹ˆë©”ì´ì…˜í˜•íƒœë‚˜ í¬ê¸°ê°€ ë‹¤ë¥¼ ìˆ˜ ìˆê¸° ë•Œë¬¸ì—
+		í•´ë‹¹ ìºë¦­í„°ì˜ í¬ê¸° ë° ì• ë‹ˆë©”ì´ì…˜ í˜•íƒœì— ë”°ë¼ ì•Œë§ëŠ” ì‚¬ì´ì¦ˆë¥¼ ê²€ì‚¬í•˜ê¸° ìœ„í•¨ì´ë‹¤.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|CornerMovement")
 	float CornerCheckCapsuleRadius_Subtraction = 20.f;
@@ -599,9 +599,9 @@ public:
 	float CornerCheckCapsuleHalfHeight_Subtraction = 6.f;
 
 	/*
-		ÄÚ³Ê¸¦ ÀÌµ¿ÇÏ´Â ÇÔ¼ö¸¦ ½ÇÇàÇÒ ¶§ ³»ºÎÀûÀ¸·Î
-		MoveComponentTo ÇÔ¼öÀÇ OverTime ÀÎÀÚ°ªÀ¸·Î »ç¿ëÇÏ´Â º¯¼ö.
-		ÇØ´ç °ª ¸¸Å­ ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ º¸°£½Ã°£À» ÁÖ¾î ºÎµå·´°Ô ¿òÁ÷ÀÎ´Ù.
+		ì½”ë„ˆë¥¼ ì´ë™í•˜ëŠ” í•¨ìˆ˜ë¥¼ ì‹¤í–‰í•  ë•Œ ë‚´ë¶€ì ìœ¼ë¡œ
+		MoveComponentTo í•¨ìˆ˜ì˜ OverTime ì¸ìê°’ìœ¼ë¡œ ì‚¬ìš©í•˜ëŠ” ë³€ìˆ˜.
+		í•´ë‹¹ ê°’ ë§Œí¼ ì• ë‹ˆë©”ì´ì…˜ì˜ ë³´ê°„ì‹œê°„ì„ ì£¼ì–´ ë¶€ë“œëŸ½ê²Œ ì›€ì§ì¸ë‹¤.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|CornerMovement|OverTime")
 	float CornerMoveComponentToOverTime_Braced = 0.3f;
@@ -613,9 +613,9 @@ public:
 			Hop
 	----------------*/
 	/* 
-		Character°¡ HopÀ» ÁøÇàÇÒ ¶§ HopÀÌ °¡´ÉÇÑ ºÎºĞÀ» Ã£¾ÒÀ» ½Ã
-		Character CapsuleComponent ¸¸Å­ °Ë»ç¸¦ ÇÏ°Ô µÇ´Âµ¥,
-		ÀÌ¶§ °Ë»çÇÒ CapsuleComponentÀÇ Å©±â¸¦ Á¶Àı ÇÏ´Â º¯¼ö
+		Characterê°€ Hopì„ ì§„í–‰í•  ë•Œ Hopì´ ê°€ëŠ¥í•œ ë¶€ë¶„ì„ ì°¾ì•˜ì„ ì‹œ
+		Character CapsuleComponent ë§Œí¼ ê²€ì‚¬ë¥¼ í•˜ê²Œ ë˜ëŠ”ë°,
+		ì´ë•Œ ê²€ì‚¬í•  CapsuleComponentì˜ í¬ê¸°ë¥¼ ì¡°ì ˆ í•˜ëŠ” ë³€ìˆ˜
 	*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop")
@@ -641,7 +641,7 @@ public:
 
 	/* Vertical Hop Check Distance */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
-	float VerticalDistanceMultiplier = 25.f; // ¾Æ·¡ °ªµé¿¡ °öÇÒ ¹èÀ²
+	float VerticalDistanceMultiplier = 25.f; // ì•„ë˜ ê°’ë“¤ì— ê³±í•  ë°°ìœ¨
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
 	float Forward_Vertical = 1.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
@@ -656,7 +656,7 @@ public:
 
 	/* Horizontal Hop Check Distance */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal")
-	float HorizontalDistanceMultiplier = 140.f; // ¾Æ·¡ °ªµé¿¡ °öÇÒ ¹èÀ²
+	float HorizontalDistanceMultiplier = 140.f; // ì•„ë˜ ê°’ë“¤ì— ê³±í•  ë°°ìœ¨
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal")
 	float LeftRight_Horizontal = 1.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal")
@@ -683,7 +683,7 @@ private:
 	class AArrowActor* ArrowActor;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InitializeValus", meta = (AllowPrivateAccess = "true"))
-	class UParkourAnimInstance* AnimInstance; // ÇØ´ç ÆÄÄí¸£ÀÇ IK ¹× Climb °ü·Ã±â´ÉÀº UParkourAnimInstance¸¦ Cast ÇØ¾ßÇÑ´Ù.	
+	class UParkourAnimInstance* AnimInstance; // í•´ë‹¹ íŒŒì¿ ë¥´ì˜ IK ë° Climb ê´€ë ¨ê¸°ëŠ¥ì€ UParkourAnimInstanceë¥¼ Cast í•´ì•¼í•œë‹¤.	
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "InitializeValus", meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArmComponent;
@@ -724,14 +724,14 @@ private:
 			Bool
 	--------------------*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Bool, meta = (AllowPrivateAccess = "true"))
-	bool bCanParkour = true; // ÆÄÄí¸£ °¡´É»óÅÂ
+	bool bCanParkour = true; // íŒŒì¿ ë¥´ ê°€ëŠ¥ìƒíƒœ
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Bool, meta = (AllowPrivateAccess = "true"))
-	bool bCanManuelClimb;// Á÷Á¢ Climb ½ÇÇà
+	bool bCanManuelClimb;// ì§ì ‘ Climb ì‹¤í–‰
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Bool, meta = (AllowPrivateAccess = "true"))
-	bool bCanAutoClimb; // Auto Climb ½ÇÇà
+	bool bCanAutoClimb; // Auto Climb ì‹¤í–‰
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Bool, meta = (AllowPrivateAccess = "true"))
 	bool bInGround;
@@ -760,7 +760,7 @@ private:
 			Camera Lerp Curve
 	-------------------------------------*/
 
-	// CameraCurveTimeÀº Public º¯¼ö ParkourCameraLerpCurve¿¡¼­ SetInitializeReference ÇÔ¼ö ½ÇÇà½Ã¿¡ °¡Á®¿Â´Ù.
+	// CameraCurveTimeì€ Public ë³€ìˆ˜ ParkourCameraLerpCurveì—ì„œ SetInitializeReference í•¨ìˆ˜ ì‹¤í–‰ì‹œì— ê°€ì ¸ì˜¨ë‹¤.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraLerpCurve, meta = (AllowPrivateAccess = "true"))
 	float CameraCurveTimeMin = 0.4;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = CameraLerpCurve, meta = (AllowPrivateAccess = "true"))
@@ -820,7 +820,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HitResult", meta = (AllowPrivateAccess = "true"))
 	FHitResult WallHitResult;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HitResult", meta = (AllowPrivateAccess = "true"))
-	FHitResult WallTopHitResult; // ÃÖÃÊ ¸ğ¼­¸® Top
+	FHitResult WallTopHitResult; // ìµœì´ˆ ëª¨ì„œë¦¬ Top
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HitResult", meta = (AllowPrivateAccess = "true"))
 	FHitResult TopHits;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HitResult", meta = (AllowPrivateAccess = "true"))
@@ -828,11 +828,11 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HitResult", meta = (AllowPrivateAccess = "true"))
 	FHitResult WallVaultHitResult;
 
-	// Climb ÇÏ´Â º®ÀÇ Á¤º¸
+	// Climb í•˜ëŠ” ë²½ì˜ ì •ë³´
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ClimbHitResult", meta = (AllowPrivateAccess = "true"))
 	FHitResult ClimbLedgeHitResult;
 
-	// HopÀÇ Á¤º¸
+	// Hopì˜ ì •ë³´
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop", meta = (AllowPrivateAccess = "true"))
 	FHitResult HopClimbLedgeHitResult;
 
@@ -855,7 +855,7 @@ private:
 	/*------------------------------
 			Montage Start Time 
 	-------------------------------*/
-	// ParkourVariable¿¡ ÀÖ´Â MontageStartPosition°ú FallingMontageStartPosition
+	// ParkourVariableì— ìˆëŠ” MontageStartPositionê³¼ FallingMontageStartPosition
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MontageStartTime", meta = (AllowPrivateAccess = "true"))
 	float MontageStartTime = 0.f;
 
@@ -873,9 +873,9 @@ private:
 			Hop 
 	-----------------*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop", meta = (AllowPrivateAccess = "true"))
-	bool bCanInCornerHop; // Ä³¸¯ÅÍÀÇ ¼öÁ÷¹æÇâ º®À¸·Î Hop °¡´É ¿©ºÎ
+	bool bCanInCornerHop; // ìºë¦­í„°ì˜ ìˆ˜ì§ë°©í–¥ ë²½ìœ¼ë¡œ Hop ê°€ëŠ¥ ì—¬ë¶€
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop", meta = (AllowPrivateAccess = "true"))
-	bool bCanOutCornerHop; // Ä³¸¯ÅÍ ¼öÆò¹æÇâ º®À¸·Î Hop °¡´É ¿©ºÎ
+	bool bCanOutCornerHop; // ìºë¦­í„° ìˆ˜í‰ë°©í–¥ ë²½ìœ¼ë¡œ Hop ê°€ëŠ¥ ì—¬ë¶€
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop", meta = (AllowPrivateAccess = "true"))
 	FRotator CornerHopRotation;
 
@@ -913,7 +913,7 @@ public:
 		class UMotionWarpingComponent* MotionWarping,
 		class UCameraComponent* Camera,
 		class UCharacterMovementComponent* Movement,
-		ETraceTypeQuery TraceTypeQuery); // ¹İµå½Ã ¸ÕÀú ½ÇÇà ÇØÁÖ¾î¾ßÇÏ´Â ÇÊ¼ö ÃÊ±âÈ­ ÇÔ¼ö
+		ETraceTypeQuery TraceTypeQuery); // ë°˜ë“œì‹œ ë¨¼ì € ì‹¤í–‰ í•´ì£¼ì–´ì•¼í•˜ëŠ” í•„ìˆ˜ ì´ˆê¸°í™” í•¨ìˆ˜
 
 	UFUNCTION(BlueprintCallable, Category = "Parkour Callable")
 	void PlayParkourCallable();
@@ -924,11 +924,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Parkour Callable")
 	void ParkourDropCallable();
 
-	// Blueprint¿Í C++ÀÇ AddMovementInputÀ» ¿¬°áÇØÁÖ´Â ÀÎÅÍÆäÀÌ½º
+	// Blueprintì™€ C++ì˜ AddMovementInputì„ ì—°ê²°í•´ì£¼ëŠ” ì¸í„°í˜ì´ìŠ¤
 	UFUNCTION(BlueprintCallable, Category = "Movement Callable")
 	void MovementInputCallable(float ScaleValue, bool bFront);
 
-	// Blueprint¿Í C++ÀÇ AddMovementInputÀ» ¿¬°áÇØÁÖ´Â ÀÎÅÍÆäÀÌ½º
+	// Blueprintì™€ C++ì˜ AddMovementInputì„ ì—°ê²°í•´ì£¼ëŠ” ì¸í„°í˜ì´ìŠ¤
 	UFUNCTION(BlueprintCallable, Category = "Movement Callable")
 	void ResetMovementCallable();
 	
@@ -951,7 +951,7 @@ private:
 	/*-----------------------
 		Check Parkour
 	-------------------------*/
-	void ParkourAction(); // ÇÙ½É ¸ŞÀÎ ÇÔ¼ö
+	void ParkourAction(); // í•µì‹¬ ë©”ì¸ í•¨ìˆ˜
 	void ParkourType();
 	void ParkourTypeUpdate();
 	bool ParkourType_VaultOrMantle();
@@ -969,10 +969,10 @@ private:
 	/*-----------------------------------------
 			Set Parkour Action / State 
 	-------------------------------------------*/
-	void SetParkourAction(FName NewParkourActionName); // ¸Â´Â ParkourPDA¸¦ °¡Á®¿È
-	void SetParkourAction(FGameplayTag NewParkourActionTag); // ¸Â´Â ParkourPDA¸¦ °¡Á®¿È
+	void SetParkourAction(FName NewParkourActionName); // ë§ëŠ” ParkourPDAë¥¼ ê°€ì ¸ì˜´
+	void SetParkourAction(FGameplayTag NewParkourActionTag); // ë§ëŠ” ParkourPDAë¥¼ ê°€ì ¸ì˜´
 	void PlayParkourMontage();
-	void SetParkourState(FGameplayTag NewParkourState); // »õ·Î¿î State »óÅÂ·Î º¯°æ
+	void SetParkourState(FGameplayTag NewParkourState); // ìƒˆë¡œìš´ State ìƒíƒœë¡œ ë³€ê²½
 	void PreviousStateCameraSetting(FGameplayTag PreviousState, FGameplayTag NewParkourState);
 	void LerpCameraTimerStart(float FinishTime);
 	void FindMontageStartTime();
@@ -1020,12 +1020,12 @@ private:
 	void CheckClimb();
 	void CheckClimbStyle();
 	void SetClimbStyle(FName ClimbStyleName);
-	void ClimbLedgeResult(); // Áß¿äº¯¼ö ClimbLedgeHitResult¸¦ °»½ÅÇÑ´Ù.
+	void ClimbLedgeResult(); // ì¤‘ìš”ë³€ìˆ˜ ClimbLedgeHitResultë¥¼ ê°±ì‹ í•œë‹¤.
 
 	/*---------------------------
 			Check Surface 
 	----------------------------*/
-	/* Ä³¸¯ÅÍ°¡ ¿òÁ÷ÀÏ¼ö ÀÖ´Â °ø°£ÀÌ ÃæºĞÇÑÁö Ã¼Å© */
+	/* ìºë¦­í„°ê°€ ì›€ì§ì¼ìˆ˜ ìˆëŠ” ê³µê°„ì´ ì¶©ë¶„í•œì§€ ì²´í¬ */
 	bool CheckMantleSurface();
 	bool CheckClimbSurface();
 	bool CheckVaultSurface();
@@ -1064,10 +1064,10 @@ private:
 	/*------------------------
 			Movement
 	--------------------------*/
-	// ÀÌµ¿ °ü·Ã ÇÔ¼ö
+	// ì´ë™ ê´€ë ¨ í•¨ìˆ˜
 	void AddMovementInput(float ScaleValue, bool bFront);
-	float GetHorizontalAxis(); 	// Climb »óÅÂ¿¡¼­ ¹æÇâÅ° ÀÔ·Â¿¡ µû¸¥ Axis ¹İÈ¯ (AddMovementInput°ú ¿¬°ü)	
-	float GetVerticalAxis(); // Climb »óÅÂ¿¡¼­ ¹æÇâÅ° ÀÔ·Â¿¡ µû¸¥ Axis ¹İÈ¯ (AddMovementInput°ú ¿¬°ü)
+	float GetHorizontalAxis(); 	// Climb ìƒíƒœì—ì„œ ë°©í–¥í‚¤ ì…ë ¥ì— ë”°ë¥¸ Axis ë°˜í™˜ (AddMovementInputê³¼ ì—°ê´€)	
+	float GetVerticalAxis(); // Climb ìƒíƒœì—ì„œ ë°©í–¥í‚¤ ì…ë ¥ì— ë”°ë¥¸ Axis ë°˜í™˜ (AddMovementInputê³¼ ì—°ê´€)
 	void ClimbMovement();
 	void SetClimbMovementTransform(FVector ClimbFirstHitImpactPoint, FVector ClimbTopHitImpactPoint, FRotator NormalizeForwardRotator, FVector NormalizeForwardVector);
 	void StopClimbMovement();
@@ -1075,10 +1075,10 @@ private:
 	void SetClimbDirection(FName NewClimbDirectionName);
 	void GetClimbForwardValue(float ScaleValue, float& HorizontalClimbForward, float& VerticalClimbForward);
 	void GetClimbRightValue(float ScaleValue, float& HorizontalClimbRight, float& VerticalClimbRight);
-	float GetClimbMoveSpeed(); // "Climb Move Speed"¶ó´Â ÀÌ¸§À» °¡Áø Ä¿ºê °ªÀ» ÀÌ¿ë
+	float GetClimbMoveSpeed(); // "Climb Move Speed"ë¼ëŠ” ì´ë¦„ì„ ê°€ì§„ ì»¤ë¸Œ ê°’ì„ ì´ìš©
 
-	// Climb StyleÀÌ BracedÀÎÁö FreeHangÀÎÁö ÆÇ´ÜÇÏ´Â ÇÔ¼ö
-	void CheckClimbBracedStyleMoving(FVector ClimbTopHitImpactPoint, FRotator NormalizeDeltaRotation_Yaw); // ¡Ú¡Ú
+	// Climb Styleì´ Bracedì¸ì§€ FreeHangì¸ì§€ íŒë‹¨í•˜ëŠ” í•¨ìˆ˜
+	void CheckClimbBracedStyleMoving(FVector ClimbTopHitImpactPoint, FRotator NormalizeDeltaRotation_Yaw); // â˜…â˜…
 	void ResetMovement();
 	bool CheckAirHang();
 
@@ -1088,7 +1088,7 @@ private:
 			Drop
 	-------------------*/
 	void ParkourDrop();
-	void FindDropDownHangLocation(); // ÆÄ·çÅ©»óÅÂ°¡ ¾Æ´Ò¶§ Ä³¸¯ÅÍ°¡ ¹Ù¶óº¸°íÀÖ´Â ¹ß¾Æ·¡¿¡ Climb³ª HangÀÌ °¡´ÉÇÑ Àå¾Ö¹°ÀÌ ÀÖ´ÂÁö È®ÀÎ
+	void FindDropDownHangLocation(); // íŒŒë£¨í¬ìƒíƒœê°€ ì•„ë‹ë•Œ ìºë¦­í„°ê°€ ë°”ë¼ë³´ê³ ìˆëŠ” ë°œì•„ë˜ì— Climbë‚˜ Hangì´ ê°€ëŠ¥í•œ ì¥ì• ë¬¼ì´ ìˆëŠ”ì§€ í™•ì¸
 	
 	UFUNCTION()
 	void SetCanManuelClimb();
@@ -1108,7 +1108,7 @@ private:
 	void CornerMove(FVector TargetRelativeLocation, FRotator TargetRelativeRotation);
 	UFUNCTION()
 	void CornerMoveCompleted();
-	// µ¿½Ã¿¡ ¿©·¯ latent actionÀ» °ü¸®ÇÏ±â À§ÇÑ °íÀ¯ ID Ä«¿îÅÍ
+	// ë™ì‹œì— ì—¬ëŸ¬ latent actionì„ ê´€ë¦¬í•˜ê¸° ìœ„í•œ ê³ ìœ  ID ì¹´ìš´í„°
 	int32 NextLatentActionUUID = 0;
 	int32 GetNextLatentActionUUID();
 	
@@ -1120,7 +1120,7 @@ private:
 	void FirstClimbLedgeResult();
 	void CheckInCornerHop();
 	void CheckOutCornerHop();
-	FGameplayTag SelectHopAction(); // Hop Action ÆÇ´Ü
+	FGameplayTag SelectHopAction(); // Hop Action íŒë‹¨
 	int32 GetHopDirection();
 	int32 GetHopDesireRotation(int32 HorizontalDirection, int32 VerticalDirection); 
 	FGameplayTag ReturnBracedHopAction(int32 Direction);
@@ -1133,11 +1133,11 @@ private:
 	----------------------------*/
 	void FindHopLocation();
 
-	void CheckHopWallTopHitResult(); // FindHopLocation¿¡¼­ °ËÃâµÇÁö ¾Ê¾ÒÀ» °æ¿ì
+	void CheckHopWallTopHitResult(); // FindHopLocationì—ì„œ ê²€ì¶œë˜ì§€ ì•Šì•˜ì„ ê²½ìš°
 	void FindCornerHopLocation();
-	void CheckCornerHopWallTopHitResult(); // CheckHopWallTopHitResult ÇÔ¼ö¿Í °ÅÀÇ À¯»ç
+	void CheckCornerHopWallTopHitResult(); // CheckHopWallTopHitResult í•¨ìˆ˜ì™€ ê±°ì˜ ìœ ì‚¬
 
-	void CheckHopCapsuleComponent(); // FindHop & FincCornerHop µÑ´Ù »ç¿ë
+	void CheckHopCapsuleComponent(); // FindHop & FincCornerHop ë‘˜ë‹¤ ì‚¬ìš©
 
 	// Retrun Distance
 	float GetSelectVerticalHopDistance();

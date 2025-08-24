@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -40,7 +40,7 @@ public:
 	/*--------------------------------------------
 			Select function according to Tag
 	----------------------------------------------*/
-	// ParkourStateTag¿¡ ¸Â´Â »óÅÂ¿¡ µû¶ó float°ª Ãâ·Â
+	// ParkourStateTagì— ë§ëŠ” ìƒíƒœì— ë”°ë¼ floatê°’ ì¶œë ¥
 	static float SelectParkourStateFloat(
 		FGameplayTag ParkourStateTag, 
 		float NotBusy, 
@@ -75,20 +75,20 @@ public:
 	/*------------------------------
 			Convert to Tag
 	--------------------------------*/
-	static EParkourGameplayTagNames ConvertFNameToParkourTagsEnum(FName Name); //FName°ªÀ» EParkourGameplayTagNamesÀ¸·Î  Convert
+	static EParkourGameplayTagNames ConvertFNameToParkourTagsEnum(FName Name); //FNameê°’ì„ EParkourGameplayTagNamesìœ¼ë¡œ  Convert
 	
 
 	/*------------------
 			Debug
 	-------------------*/
 	/*
-		FNameÀ¸·Î GameplayTag¸¦ ºñ±³¹× °Ë»çÇÏ±â¶§¹®¿¡ È¤½Ã ÄÚµå ÀÛ¼ºÁß¿¡ ½Ç¼ö·Î ÀÌ¸§À» ´Ù¸£°Ô ¾µ¼öµµ ÀÖ±â ¶§¹®¿¡
-		GameplayTagÀÇ ÀÌ¸§À¸·Î ÀÌ·ç¾îÁø EParkourGameplayTagNames¸¦ ÅëÇØ ÀÌ¸§ Ã¼Å©.
-		¶Ç´Â Enum Type¿¡ ÇØ´ç DisplayNameÀÌ ÀÖ´ÂÁöµµ È®ÀÎ°¡´É 
+		FNameìœ¼ë¡œ GameplayTagë¥¼ ë¹„êµë° ê²€ì‚¬í•˜ê¸°ë•Œë¬¸ì— í˜¹ì‹œ ì½”ë“œ ì‘ì„±ì¤‘ì— ì‹¤ìˆ˜ë¡œ ì´ë¦„ì„ ë‹¤ë¥´ê²Œ ì“¸ìˆ˜ë„ ìˆê¸° ë•Œë¬¸ì—
+		GameplayTagì˜ ì´ë¦„ìœ¼ë¡œ ì´ë£¨ì–´ì§„ EParkourGameplayTagNamesë¥¼ í†µí•´ ì´ë¦„ ì²´í¬.
+		ë˜ëŠ” Enum Typeì— í•´ë‹¹ DisplayNameì´ ìˆëŠ”ì§€ë„ í™•ì¸ê°€ëŠ¥ 
 	*/
 	template<typename T>
 	static bool DebugEnumNameCheck(FName Name);
-	static void CrashLog(FString UE_LOGText, FString CrashText); // LOG¿¡¼­ ¼­½Ä¹®ÀÚ¸¦ ¾µ °æ¿ì °¡º¯ÀÎÀÚ	
+	static void CrashLog(FString UE_LOGText, FString CrashText); // LOGì—ì„œ ì„œì‹ë¬¸ìë¥¼ ì“¸ ê²½ìš° ê°€ë³€ì¸ì	
 	static void CheckTagName(FName TagName);
 };
 
@@ -97,10 +97,10 @@ inline bool UPSFunctionLibrary::DebugEnumNameCheck(FName Name)
 {
 	UEnum* ParkourTypeEnum = StaticEnum<T>();
 
-	// EnumÀÇ ¸ğµç °ªÀ» ¼øÈ¸ÇÏ¸ç FName°ú ºñ±³
+	// Enumì˜ ëª¨ë“  ê°’ì„ ìˆœíšŒí•˜ë©° FNameê³¼ ë¹„êµ
 	for (int32 i = 0; i < ParkourTypeEnum->NumEnums(); i++)
 	{
-		// DisplayName °¡Á®¿À±â
+		// DisplayName ê°€ì ¸ì˜¤ê¸°
 		FString DisplayName = ParkourTypeEnum->GetDisplayNameTextByIndex(i).ToString();
 		if (FName(*DisplayName) == Name)
 			return true;

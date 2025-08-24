@@ -1,7 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Animations/ParkourAnimInstance.h"
+#include "Engine/World.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "FunctionLibrary/PSFunctionLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -48,7 +50,7 @@ bool UParkourAnimInstance::SetLeftHandLedgeLocation(FVector TargetLeftHandLedgeL
 	bool bClimbState = UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb"));
 	float InterpSpeed = UKismetMathLibrary::SelectFloat(IKInterpSpeed, IKNotClimbInterpSpeed, bClimbState);
 
-	// Target LocationÀ¸·Î VInterp
+	// Target Locationìœ¼ë¡œ VInterp
 	LeftHandLedgeLocation = UKismetMathLibrary::VInterpTo(LeftHandLedgeLocation, TargetLeftHandLedgeLocation, 
 		GetWorld()->GetDeltaSeconds(), InterpSpeed);
 
@@ -64,7 +66,7 @@ bool UParkourAnimInstance::SetLeftHandLedgeRotation(FRotator TargetLeftHandLedge
 	bool bClimbState = UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb"));
 	float InterpSpeed = UKismetMathLibrary::SelectFloat(IKInterpSpeed, IKNotClimbInterpSpeed, bClimbState);
 
-	// Target RotationÀ¸·Î VInterp
+	// Target Rotationìœ¼ë¡œ VInterp
 	LeftHandLedgeRotation  = UKismetMathLibrary::RInterpTo(LeftHandLedgeRotation, TargetLeftHandLedgeRotation,
 		GetWorld()->GetDeltaSeconds(), InterpSpeed);
 
@@ -80,7 +82,7 @@ bool UParkourAnimInstance::SetLeftFootLocation(FVector TargetLeftFootLocation)
 	bool bClimbState = UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb"));
 	float InterpSpeed = UKismetMathLibrary::SelectFloat(IKInterpSpeed, IKNotClimbInterpSpeed, bClimbState);
 
-	// Target LocationÀ¸·Î VInterp
+	// Target Locationìœ¼ë¡œ VInterp
 	LeftFootLocation = UKismetMathLibrary::VInterpTo(LeftFootLocation, TargetLeftFootLocation,
 		GetWorld()->GetDeltaSeconds(), InterpSpeed);
 
@@ -115,7 +117,7 @@ bool UParkourAnimInstance::SetRightHandLedgeLocation(FVector TargetRightHandLedg
 	bool bClimbState = UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb"));
 	float InterpSpeed = UKismetMathLibrary::SelectFloat(IKInterpSpeed, IKNotClimbInterpSpeed, bClimbState);
 
-	// Target LocationÀ¸·Î VInterp
+	// Target Locationìœ¼ë¡œ VInterp
 	RightHandLedgeLocation = UKismetMathLibrary::VInterpTo(RightHandLedgeLocation, TargetRightHandLedgeLocation,
 		GetWorld()->GetDeltaSeconds(), InterpSpeed);
 
@@ -132,7 +134,7 @@ bool UParkourAnimInstance::SetRightHandLedgeRotation(FRotator TargetRightHandLed
 	bool bClimbState = UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb"));
 	float InterpSpeed = UKismetMathLibrary::SelectFloat(IKInterpSpeed, IKNotClimbInterpSpeed, bClimbState);
 
-	// Target RotationÀ¸·Î VInterp
+	// Target Rotationìœ¼ë¡œ VInterp
 	RightHandLedgeRotation = UKismetMathLibrary::RInterpTo(RightHandLedgeRotation, TargetRightHandLedgeRotation,
 		GetWorld()->GetDeltaSeconds(), InterpSpeed);
 
@@ -149,7 +151,7 @@ bool UParkourAnimInstance::SetRightFootLocation(FVector TargetRightFootLocation)
 	bool bClimbState = UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb"));
 	float InterpSpeed = UKismetMathLibrary::SelectFloat(IKInterpSpeed, IKNotClimbInterpSpeed, bClimbState);
 
-	// Target LocationÀ¸·Î VInterp
+	// Target Locationìœ¼ë¡œ VInterp
 	RightFootLocation = UKismetMathLibrary::VInterpTo(RightFootLocation, TargetRightFootLocation,
 		GetWorld()->GetDeltaSeconds(), InterpSpeed);
 

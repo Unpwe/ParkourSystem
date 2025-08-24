@@ -1,8 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ParkourComponent/ParkourComponent.h"
 #include "ParkourComponent/ArrowActor.h"
+#include "Curves/CurveFloat.h"
+#include "TimerManager.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Character.h"
@@ -137,10 +139,10 @@ void UParkourComponent::ParkourDropCallable()
 }
 
 
-// Ä³¸¯ÅÍ¿¡¼­ ¿¬°áÇÒ BlueprintCallable ÇÔ¼ö
+// ìºë¦­í„°ì—ì„œ ì—°ê²°í•  BlueprintCallable í•¨ìˆ˜
 void UParkourComponent::MovementInputCallable(float ScaleValue, bool bFront)
 {
-	// Ledge »óÅÂ¿¡ µµ´ŞÇÏ°Ô µÇ¸é Climb »óÅÂ¿¡¼­ Ã¹ ¿òÁ÷ÀÓ false·Î ÃÊ±âÈ­
+	// Ledge ìƒíƒœì— ë„ë‹¬í•˜ê²Œ ë˜ë©´ Climb ìƒíƒœì—ì„œ ì²« ì›€ì§ì„ falseë¡œ ì´ˆê¸°í™”
 	if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.ReachLedge")))
 		bFirstClimbMove = false; 
 
@@ -175,14 +177,14 @@ void UParkourComponent::CallMontageRightIK(bool bIKStart)
 /*------------------
 	Check Parkour
 --------------------*/
-// ÆÄÄí¸£¸¦ ½ÇÇàÇÏ´Â ¸ŞÀÎ ÇÔ¼ö 
+// íŒŒì¿ ë¥´ë¥¼ ì‹¤í–‰í•˜ëŠ” ë©”ì¸ í•¨ìˆ˜ 
 void UParkourComponent::ParkourAction()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
 	LOG(Warning, TEXT("ParkourAction"));
 #endif
 
-	// No Action »óÅÂÀÏ¶§ ½ÇÇà°¡´É
+	// No Action ìƒíƒœì¼ë•Œ ì‹¤í–‰ê°€ëŠ¥
 	if (UPSFunctionLibrary::CompGameplayTagName(ParkourActionTag, FName(TEXT("Parkour.Action.NoAction"))))
 	{
 		if (bAutoClimb ? bCanAutoClimb : bCanManuelClimb)
@@ -195,7 +197,7 @@ void UParkourComponent::ParkourAction()
 }
 
 
-// ÆÄÄí¸£ »óÅÂ GameplayTag ¾÷µ¥ÀÌÆ®
+// íŒŒì¿ ë¥´ ìƒíƒœ GameplayTag ì—…ë°ì´íŠ¸
 void UParkourComponent::ParkourType()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -220,7 +222,7 @@ void UParkourComponent::ParkourTypeUpdate()
 	LOG(Warning, TEXT("ParkourTypeUpdate"));
 #endif
 
-	// ¾Æ¹«·± »óÅÂ°¡ ¾Æ´Ò½Ã¿¡
+	// ì•„ë¬´ëŸ° ìƒíƒœê°€ ì•„ë‹ì‹œì—
 	if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, "Parkour.State.NotBusy"))
 	{
 		if (bInGround)
@@ -240,20 +242,20 @@ void UParkourComponent::ParkourTypeUpdate()
 			else if (UKismetMathLibrary::InRange_FloatFloat(WallHeight, 0.f, 30.f, true, true))
 			{
 				#ifdef DEBUG_PARKOURCOMPONENT
-					LOG(Warning, TEXT("Jump ±¸°£"));
+					LOG(Warning, TEXT("Jump êµ¬ê°„"));
 				#endif
-				// º® ³ôÀÌ°¡ ¸Å¿ì ³·À½. ÆÄÄí¸£°¡ ºÒ°¡´É ÇÏ¿© Á¡ÇÁ¸¸ °¡´ÉÇÑ ½ÃÁ¡
+				// ë²½ ë†’ì´ê°€ ë§¤ìš° ë‚®ìŒ. íŒŒì¿ ë¥´ê°€ ë¶ˆê°€ëŠ¥ í•˜ì—¬ ì í”„ë§Œ ê°€ëŠ¥í•œ ì‹œì 
 				if (bAutoJump)
 					BP_AutoJump();
 				else
-					OwnerCharacter->Jump(); // ¿©±â±îÁö¿À¸é ÆÄÄí¸£°¡ ¾Æ¿¹ ÇÒ ¼ö ¾ø´Ù´Â ¶æÀÌ¹Ç·Î Á¡ÇÁ Ã³¸®
+					OwnerCharacter->Jump(); // ì—¬ê¸°ê¹Œì§€ì˜¤ë©´ íŒŒì¿ ë¥´ê°€ ì•„ì˜ˆ í•  ìˆ˜ ì—†ë‹¤ëŠ” ëœ»ì´ë¯€ë¡œ ì í”„ ì²˜ë¦¬
 			}
 			else if (CheckClimbSurface())
 			{
-				// Climb °¡´É Á¸Àç
+				// Climb ê°€ëŠ¥ ì¡´ì¬
 				//if (WallHeight >= CanClimbHeight)
 				#ifdef DEBUG_PARKOURCOMPONENT
-					LOG(Warning, TEXT("Climb °¡´É ±¸°£"));
+					LOG(Warning, TEXT("Climb ê°€ëŠ¥ êµ¬ê°„"));
 				#endif
 			
 					CheckClimb();
@@ -263,15 +265,15 @@ void UParkourComponent::ParkourTypeUpdate()
 		}
 		else if (CheckClimbSurface())
 		{
-			// ¶¥ÀÌ ¾Æ´Ï¹Ç·Î Climb °¡´É Á¸Àç	
+			// ë•…ì´ ì•„ë‹ˆë¯€ë¡œ Climb ê°€ëŠ¥ ì¡´ì¬	
 			CheckClimb();
 		}
 	}
-	// ÇöÀç Climb »óÅÂÀÏ ¶§,
+	// í˜„ì¬ Climb ìƒíƒœì¼ ë•Œ,
 	else if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, "Parkour.State.Climb"))
 	{
-		// ÇöÀç Climb »óÅÂ ÀÏ¶§ Hop °¡´É Á¸Àç
-		// ÃßÈÄ Ãß°¡
+		// í˜„ì¬ Climb ìƒíƒœ ì¼ë•Œ Hop ê°€ëŠ¥ ì¡´ì¬
+		// ì¶”í›„ ì¶”ê°€
 		CheckClimbUpOrHop();
 	}
 }
@@ -282,9 +284,9 @@ bool UParkourComponent::ParkourType_VaultOrMantle()
 	LOG(Warning, TEXT("ParkourType_VaultOrMantle"));
 #endif
 
-	// WallHeight = Ä³¸¯ÅÍ rootºÎÅÍ º®ÀÇ Top±îÁöÀÇ ³ôÀÌ
-	// WallDepth = º®ÀÇ Ã¹ Top ÁöÁ¡ºÎÅÍ ³¡±îÁöÀÇ °Å¸®
-	// VaultHeight = º®ÀÇ Top.ZºÎÅÍ Vault ÂøÁöºÎºĞÀÇ ¶¥ÀÇ ZÃà±îÁöÀÇ ³ôÀÌ
+	// WallHeight = ìºë¦­í„° rootë¶€í„° ë²½ì˜ Topê¹Œì§€ì˜ ë†’ì´
+	// WallDepth = ë²½ì˜ ì²« Top ì§€ì ë¶€í„° ëê¹Œì§€ì˜ ê±°ë¦¬
+	// VaultHeight = ë²½ì˜ Top.Zë¶€í„° Vault ì°©ì§€ë¶€ë¶„ì˜ ë•…ì˜ Zì¶•ê¹Œì§€ì˜ ë†’ì´
 
 	bool bVaultHeight = CheckVaultMinHeight <= WallHeight && WallHeight <= CheckVaultMaxHeight;
 	bool bVaultDepth = CheckThinVaultMinDepth <= WallDepth && WallDepth <= CheckVaultMaxDepth;
@@ -305,7 +307,7 @@ bool UParkourComponent::ParkourType_VaultOrMantle()
 	{
 		bool bThinVault = CheckThinVaultMinDepth <= WallDepth && WallDepth <= CheckThinVaultMaxDepth;
 
-		// º®ÀÌ ³ôÁö¾Ê°í Vault ÇÒ ¼öÀÖÀ¸¸ç º®ÀÇ ÆøÀÌ Á¼Àº °æ¿ì
+		// ë²½ì´ ë†’ì§€ì•Šê³  Vault í•  ìˆ˜ìˆìœ¼ë©° ë²½ì˜ í­ì´ ì¢ì€ ê²½ìš°
 		if (bThinVault)
 		{
 			if (CheckVaultSurface())
@@ -315,7 +317,7 @@ bool UParkourComponent::ParkourType_VaultOrMantle()
 		}
 		else if (CharacterMovement->Velocity.Length() > Velocity_VaultMantle)
 		{
-			// ¼Óµµ Ã¼Å©
+			// ì†ë„ ì²´í¬
 			if (CheckVaultSurface())
 				SetParkourAction(TEXT("Parkour.Action.Vault"));
 			else
@@ -336,7 +338,7 @@ bool UParkourComponent::ParkourType_VaultOrMantle()
 	/* Low Mantle */
 	if (!bVaultHeight)
 	{
-		// WallHeight°¡ ³·¾Æ Mantle¸¸ °¡´É
+		// WallHeightê°€ ë‚®ì•„ Mantleë§Œ ê°€ëŠ¥
 		bool bLowMantle = CheckLowMantleMin <= WallHeight && WallHeight <= CheckLowMantleMax;
 
 		if (bLowMantle)
@@ -347,7 +349,7 @@ bool UParkourComponent::ParkourType_VaultOrMantle()
 			else
 				SetParkourAction(TEXT("Parkour.Action.NoAction"));
 
-			return true; // Low MantleÀÏ ¶§¸¸ True Ãâ·Â
+			return true; // Low Mantleì¼ ë•Œë§Œ True ì¶œë ¥
 		}
 		else
 		{
@@ -374,9 +376,9 @@ bool UParkourComponent::ParkourType_VaultOrMantle()
 
 bool UParkourComponent::ParkourType_HighVault()
 {
-	// WallHeight = Ä³¸¯ÅÍ rootºÎÅÍ º®ÀÇ Top±îÁöÀÇ ³ôÀÌ
-	// WallDepth = º®ÀÇ Ã¹ Top ÁöÁ¡ºÎÅÍ ³¡±îÁöÀÇ °Å¸®
-	// VaultHeight = º®ÀÇ Top.ZºÎÅÍ Vault ÂøÁöºÎºĞÀÇ ¶¥ÀÇ ZÃà±îÁöÀÇ ³ôÀÌ
+	// WallHeight = ìºë¦­í„° rootë¶€í„° ë²½ì˜ Topê¹Œì§€ì˜ ë†’ì´
+	// WallDepth = ë²½ì˜ ì²« Top ì§€ì ë¶€í„° ëê¹Œì§€ì˜ ê±°ë¦¬
+	// VaultHeight = ë²½ì˜ Top.Zë¶€í„° Vault ì°©ì§€ë¶€ë¶„ì˜ ë•…ì˜ Zì¶•ê¹Œì§€ì˜ ë†’ì´
 
 	bool bHighVaultHeight = CheckVaultMaxHeight <= WallHeight && WallHeight <= CheckHighVaultMaxHeight;
 	bool bHighVaultDepth = CheckThinVaultMaxDepth <= WallDepth && WallDepth <= CheckVaultMaxDepth;
@@ -426,14 +428,14 @@ bool UParkourComponent::ParkourType_HighVault()
 
 
 
-// °¢Á¾ ÁöÇüÁö¹° Æ®·¹ÀÌ½ºÇÏ¿© FHitResult·Î Á¤º¸ ½Àµæ
+// ê°ì¢… ì§€í˜•ì§€ë¬¼ íŠ¸ë ˆì´ìŠ¤í•˜ì—¬ FHitResultë¡œ ì •ë³´ ìŠµë“
 void UParkourComponent::ParkourCheckWallShape()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
 	LOG(Warning, TEXT("ParkourCheckWallShape"));
 #endif
 
-	// Ä³¸¯ÅÍ Á¤¸é¿¡ º®ÀÌ ÀÖ´ÂÁö ÆÇ´ÜÇÏ±â À§ÇÑ Trace
+	// ìºë¦­í„° ì •ë©´ì— ë²½ì´ ìˆëŠ”ì§€ íŒë‹¨í•˜ê¸° ìœ„í•œ Trace
 	int32 FirstCheck_LastIndex = UKismetMathLibrary::SelectInt(CheckParkourFallingHeightCnt, 15, CharacterMovement->IsFalling());
 	FVector CharacterFwdVector = OwnerCharacter->GetActorForwardVector();
 	FVector CharacterLocation = OwnerCharacter->GetActorLocation();
@@ -449,11 +451,11 @@ void UParkourComponent::ParkourCheckWallShape()
 		// Find Wall
 		if (FirstCheckHitResult.bBlockingHit && !FirstCheckHitResult.bStartPenetrating)
 		{
-			// µÎ¹øÂ° Trace ±¸°£
-			// Ã³À½ º®ÀÇ À§Ä¡¸¦ ÆÄ¾ÇÇÑ FirstCheckHitResultÀÇ °ªÀ» ÅëÇØ µÎ¹øÂ° Trace¸¦ ÁøÇà
+			// ë‘ë²ˆì§¸ Trace êµ¬ê°„
+			// ì²˜ìŒ ë²½ì˜ ìœ„ì¹˜ë¥¼ íŒŒì•…í•œ FirstCheckHitResultì˜ ê°’ì„ í†µí•´ ë‘ë²ˆì§¸ Traceë¥¼ ì§„í–‰
 			WallHitTraces.Empty();
 
-			// Climb »óÅÂÀÎ °æ¿ì FirstCheckHitResult.ImpactPoint.Z¸¦ ¾Æ´Ñ°æ¿ì OwnerCharacterÀÇ Location.Z°ªÀ» »ç¿ë
+			// Climb ìƒíƒœì¸ ê²½ìš° FirstCheckHitResult.ImpactPoint.Zë¥¼ ì•„ë‹Œê²½ìš° OwnerCharacterì˜ Location.Zê°’ì„ ì‚¬ìš©
 			bool bClimbState = UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, FName(TEXT("Parkour.State.Climb")));
 			FVector FirstHitTraceLocation = FVector(FirstCheckHitResult.ImpactPoint.X, FirstCheckHitResult.ImpactPoint.Y, (bClimbState ? FirstCheckHitResult.ImpactPoint.Z : CharacterLocation.Z));
 			FVector NormalizeDeltaRightVector = GetRightVector(UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(FirstCheckHitResult.ImpactNormal));
@@ -464,7 +466,7 @@ void UParkourComponent::ParkourCheckWallShape()
 			int32 SecondCheck_LastIndex = UKismetMathLibrary::FTrunc(UPSFunctionLibrary::SelectParkourStateFloat(ParkourStateTag, 4.f, 0.f, 0.f, 2.f));
 			for (int32 i = 0; i <= SecondCheck_LastIndex; i++)
 			{
-				// ¿ŞÂÊ ¿À¸¥ÂÊ ±ÕµîÇÏ°Ô °Ë»çÇÏ±â À§ÇØ i´Â È¦¼ö¿©¾ßÇÑ´Ù.
+				// ì™¼ìª½ ì˜¤ë¥¸ìª½ ê· ë“±í•˜ê²Œ ê²€ì‚¬í•˜ê¸° ìœ„í•´ iëŠ” í™€ìˆ˜ì—¬ì•¼í•œë‹¤.
 				float StatePositionIndex = i * 20 + PositionIndex;
 				FVector BasePos = FVector(0.f, 0.f, bClimbState ? 0.f : CheckParkourFromCharacterRootZ) + FirstHitTraceLocation + (NormalizeDeltaRightVector * StatePositionIndex);
 				FVector StartPos = BasePos + (NormalizeDeltaForwadVector * -40.f);
@@ -473,17 +475,17 @@ void UParkourComponent::ParkourCheckWallShape()
 				UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartPos, EndPos, ParkourTraceType, false, TArray<AActor*>(), DDT_ParkourCheckWallShape, SecondCheckHitResult, true);
 				HopHitTraces.Empty();
 
-				// ¼¼¹øÂ° Trace ±¸°£
+				// ì„¸ë²ˆì§¸ Trace êµ¬ê°„
 				int32 ThirdCheck_LastIndex = UPSFunctionLibrary::SelectParkourStateFloat(ParkourStateTag, CheckParkourClimbHeight, 0.f, 0.f, 7.f);
 				for (int32 j = 0; j < ThirdCheck_LastIndex; j++)
 				{
-					// À§ÀÇ Second Check Hit ResultÀÇ ÀÚ¸®¿¡¼­ ¼¼·Î·Î Line Trace¸¦ ÇÏ´Â °úÁ¤
+					// ìœ„ì˜ Second Check Hit Resultì˜ ìë¦¬ì—ì„œ ì„¸ë¡œë¡œ Line Traceë¥¼ í•˜ëŠ” ê³¼ì •
 					FVector HopTraceStartPos = SecondCheckHitResult.TraceStart + FVector(0.f, 0.f, j * 8.f);
 					FVector HopTraceEndPos = SecondCheckHitResult.TraceEnd + FVector(0.f, 0.f, j * 8.f);
 
 					FHitResult HopCheckHitResult;
 					UKismetSystemLibrary::LineTraceSingle(GetWorld(), HopTraceStartPos, HopTraceEndPos, ParkourTraceType, false, TArray<AActor*>(), DDT_ParkourCheckWallShape, HopCheckHitResult, true);
-					HopHitTraces.Emplace(HopCheckHitResult); // ¸â¹ö º¯¼ö
+					HopHitTraces.Emplace(HopCheckHitResult); // ë©¤ë²„ ë³€ìˆ˜
 				}
 
 				for (int32 Index = 1; Index < HopHitTraces.Num(); Index++)
@@ -493,7 +495,7 @@ void UParkourComponent::ParkourCheckWallShape()
 					float PrevHtDistance = 0.f;
 					float CurrentHtDistance = 0.f;
 
-					// bBlocking »óÅÂ¿¡ µû¶ó HitÇÑ DistanceÀÎÁö, Trace ±× ÀÚÃ¼ ±æÀÌÀÎÁö ¿©ºÎ°¡ °¥¸°´Ù.
+					// bBlocking ìƒíƒœì— ë”°ë¼ Hití•œ Distanceì¸ì§€, Trace ê·¸ ìì²´ ê¸¸ì´ì¸ì§€ ì—¬ë¶€ê°€ ê°ˆë¦°ë‹¤.
 					if (CurrentHopHitResult.bBlockingHit)
 						CurrentHtDistance = CurrentHopHitResult.Distance;
 					else
@@ -505,8 +507,8 @@ void UParkourComponent::ParkourCheckWallShape()
 						PrevHtDistance = UKismetMathLibrary::Vector_Distance(PrevHopHitResult.TraceStart, PrevHopHitResult.TraceEnd);
 
 					/*
-						Distance°¡ ¾ç¼ö°¡ ³ª¿Ô´Ù´Â °ÍÀº Prev°¡ ¸¶Áö¸·À¸·Î ÃÖ¼Ò°ªÀÎ ºÎºĞÀÌ¶ó´Â Áß¸íÀÌ´Ù.
-						Ä³¸¯ÅÍ¿¡°Ô À¯È¿ÇÑ º®ÀÇ ÃÖÁ¾ÀûÀÎ Á¤º¸¸¦ Áß¿ä º¯¼öÀÎ WallHitTrace¿¡ ÀúÀåÇÑ´Ù.
+						Distanceê°€ ì–‘ìˆ˜ê°€ ë‚˜ì™”ë‹¤ëŠ” ê²ƒì€ Prevê°€ ë§ˆì§€ë§‰ìœ¼ë¡œ ìµœì†Œê°’ì¸ ë¶€ë¶„ì´ë¼ëŠ” ì¤‘ëª…ì´ë‹¤.
+						ìºë¦­í„°ì—ê²Œ ìœ íš¨í•œ ë²½ì˜ ìµœì¢…ì ì¸ ì •ë³´ë¥¼ ì¤‘ìš” ë³€ìˆ˜ì¸ WallHitTraceì— ì €ì¥í•œë‹¤.
 
 					*/
 					if (CurrentHtDistance - PrevHtDistance > 10.f)
@@ -550,18 +552,18 @@ void UParkourComponent::SetupParkourWallHitResult()
 		float CurrnetHitResultDistance = UKismetMathLibrary::Vector_Distance(WallHitTraces[i].ImpactPoint, CharacterLocation);
 		float PrevHitResultDistance = UKismetMathLibrary::Vector_Distance(CharacterLocation, WallHitResult.ImpactPoint);
 
-		// ÃÖ¼Ò °Å¸®ÀÏ¶§ °»½Å
+		// ìµœì†Œ ê±°ë¦¬ì¼ë•Œ ê°±ì‹ 
 		if (CurrnetHitResultDistance <= PrevHitResultDistance)
 			WallHitResult = WallHitTraces[i];
 	}
 
-	// ±¸ÇÑ WallHitResult¸¦ ÅëÇØ WallÀÇ Top°ú Depth¸¦ ±¸ÇÑ´Ù
+	// êµ¬í•œ WallHitResultë¥¼ í†µí•´ Wallì˜ Topê³¼ Depthë¥¼ êµ¬í•œë‹¤
 	ParkourCheckWallTopDepthShape();
 }
 
 
-// ParkourCheckWallShape ÇÔ¼ö¿¡¼­ ±¸ÇÑ FHitResult °ªÀ» ÀÌ¿ëÇØ Wall TopÀ» ±¸ÇÏ°í,
-// Vault°¡ °¡´ÉÇÒ °æ¿ì Depth¸¦ ±¸ÇÏ´Â ÇÔ¼ö
+// ParkourCheckWallShape í•¨ìˆ˜ì—ì„œ êµ¬í•œ FHitResult ê°’ì„ ì´ìš©í•´ Wall Topì„ êµ¬í•˜ê³ ,
+// Vaultê°€ ê°€ëŠ¥í•  ê²½ìš° Depthë¥¼ êµ¬í•˜ëŠ” í•¨ìˆ˜
 void UParkourComponent::ParkourCheckWallTopDepthShape()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -570,7 +572,7 @@ void UParkourComponent::ParkourCheckWallTopDepthShape()
 
 	if (WallHitResult.bBlockingHit && !WallHitResult.bStartPenetrating)
 	{
-		// Climb »óÅÂ°¡ ¾Æ´Ñ°æ¿ì¿¡¸¸ Wall RotationÀÌ ÇÊ¿äÇÏ´Ù.
+		// Climb ìƒíƒœê°€ ì•„ë‹Œê²½ìš°ì—ë§Œ Wall Rotationì´ í•„ìš”í•˜ë‹¤.
 		if (!UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, FName(TEXT("Parkour.State.Climb"))))
 			WallRotation = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(WallHitResult.ImpactNormal);
 
@@ -584,12 +586,12 @@ void UParkourComponent::ParkourCheckWallTopDepthShape()
 			FHitResult TopHitResult;
 			bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 2.5f, ParkourTraceType, false, TArray<AActor*>(), DDT_ParkourCheckWallTopDepthShape, TopHitResult, true);
 
-			// Ã¹¹øÂ°ÀÎ °æ¿ì HitÇÏÁö¾Ê¾Ò´Ù¸é continue
+			// ì²«ë²ˆì§¸ì¸ ê²½ìš° Hití•˜ì§€ì•Šì•˜ë‹¤ë©´ continue
 			if (i == 0)
 			{
 				if (bHit)
 				{
-					// WallTopHitResult´Â Ã³À½ TopÀ» ÀÇ¹ÌÇÑ´Ù.
+					// WallTopHitResultëŠ” ì²˜ìŒ Topì„ ì˜ë¯¸í•œë‹¤.
 					WallTopHitResult = TopHitResult;
 					TopHits = TopHitResult;
 				}
@@ -597,23 +599,23 @@ void UParkourComponent::ParkourCheckWallTopDepthShape()
 					continue;
 			}
 			else if (bHit)
-				TopHits = TopHitResult; // °Ë»ç µÈ´Ù¸é °è¼Ó °»½Å
+				TopHits = TopHitResult; // ê²€ì‚¬ ëœë‹¤ë©´ ê³„ì† ê°±ì‹ 
 
 
-			// ´õÀÌ»ó Hit ÇÏÁö¾Ê¾Ò´Ù¸é Vault °¡´É¼ºÀÌ ÀÖ´Ù´Â ¶æ
-			// ¶§¹®¿¡ º® ³Ê¸Ó¿¡ ÂøÁöÇÒ ¼ö ÀÖ´Â °÷ÀÌ ÀÖ´ÂÁö ÆÇ´ÜÇÏ´Â ·ÎÁ÷
+			// ë”ì´ìƒ Hit í•˜ì§€ì•Šì•˜ë‹¤ë©´ Vault ê°€ëŠ¥ì„±ì´ ìˆë‹¤ëŠ” ëœ»
+			// ë•Œë¬¸ì— ë²½ ë„ˆë¨¸ì— ì°©ì§€í•  ìˆ˜ ìˆëŠ” ê³³ì´ ìˆëŠ”ì§€ íŒë‹¨í•˜ëŠ” ë¡œì§
 			if (!bHit)
 			{
 				if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.NotBusy")))
 				{
-					// ÃÖ¼ÒÇÑÀÇ º® µÎ²² ÃøÁ¤
-					// À§¿¡¼­ °è¼Ó ÃÊ±âÈ­ ÇØÁØ TopHits¸¦ ÀÌ¿ëÇÏ¿© Depth ÃøÁ¤
+					// ìµœì†Œí•œì˜ ë²½ ë‘ê»˜ ì¸¡ì •
+					// ìœ„ì—ì„œ ê³„ì† ì´ˆê¸°í™” í•´ì¤€ TopHitsë¥¼ ì´ìš©í•˜ì—¬ Depth ì¸¡ì •
 					FVector StartDepthPos = TopHits.ImpactPoint + (WallForwardVector * 30.f);
 					FVector EndDepthPos = TopHits.ImpactPoint;
 					FHitResult DepthHitResult;
 					if (UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartDepthPos, EndDepthPos, 10.f, ParkourTraceType, false, TArray<AActor*>(), DDT_ParkourCheckWallTopDepthShape, DepthHitResult, true))
 					{
-						// Vault Result¸¦ ±¸ÇÏ´Â °úÁ¤.
+						// Vault Resultë¥¼ êµ¬í•˜ëŠ” ê³¼ì •.
 						WallDepthHitResult = DepthHitResult;
 					
 						FVector StartVaultPos = WallDepthHitResult.ImpactPoint + WallForwardVector * 70.f;
@@ -640,7 +642,7 @@ void UParkourComponent::ParkourCheckDistance()
 		return;
 	}
 
-	// Ä³¸¯ÅÍÀÇ ·çÆ®¿Í Top±îÁöÀÇ ZÃà ³ôÀÌ ÃøÁ¤
+	// ìºë¦­í„°ì˜ ë£¨íŠ¸ì™€ Topê¹Œì§€ì˜ Zì¶• ë†’ì´ ì¸¡ì •
 	if (WallTopHitResult.bBlockingHit)
 	{
 		if (OwnerCharacter)
@@ -650,24 +652,24 @@ void UParkourComponent::ParkourCheckDistance()
 		}	
 	}
 
-	// Top°ú DpethÀÇ Distance.
+	// Topê³¼ Dpethì˜ Distance.
 	if (WallTopHitResult.bBlockingHit && WallDepthHitResult.bBlockingHit)
 		WallDepth = UKismetMathLibrary::Vector_Distance(WallTopHitResult.ImpactPoint, WallDepthHitResult.ImpactPoint);
 	else
 		WallDepth = 0.f;
 
 
-	// Depth¿¡¼­ Vault±îÁöÀÇ ZÃàÀ» »©¼­ ³ôÀÌ ÃøÁ¤
+	// Depthì—ì„œ Vaultê¹Œì§€ì˜ Zì¶•ì„ ë¹¼ì„œ ë†’ì´ ì¸¡ì •
 	if (WallDepthHitResult.bBlockingHit && WallVaultHitResult.bBlockingHit)
 		VaultHeight = WallDepthHitResult.ImpactPoint.Z - WallVaultHitResult.ImpactPoint.Z;
 	else
 		VaultHeight = 0.f;
 }
 
-// Tick¿¡¼­ ½ÇÇàÇÏ´Â ÇÔ¼ö
-// Ä³¸¯ÅÍ°¡ ¶¥¿¡ ÀÖÀ» ¶§ FHitResultµéÀ» ResetÇØÁÖ´Â ¿ªÇÒ
-// bAuto Climb = true »óÅÂÀÏ½Ã Ä³¸¯ÅÍ root ¾Æ·¡¸¦ Tick¸¶´Ù Ã¼Å©ÇÏ¿© InGround°¡ ¾Æ´Ï¸é PakrourActionÀ» ½ÇÇàÇÑ´Ù. 
-// (ParkourAction ¾È¿¡´Â bAutoClimb°¡ true ÀÏ½Ã ÀÚµ¿ Á¡ÇÁÇÏ´Â ÇÏ´Â ·ÎÁ÷ÀÌ ÀÖ´Ù.)
+// Tickì—ì„œ ì‹¤í–‰í•˜ëŠ” í•¨ìˆ˜
+// ìºë¦­í„°ê°€ ë•…ì— ìˆì„ ë•Œ FHitResultë“¤ì„ Resetí•´ì£¼ëŠ” ì—­í• 
+// bAuto Climb = true ìƒíƒœì¼ì‹œ ìºë¦­í„° root ì•„ë˜ë¥¼ Tickë§ˆë‹¤ ì²´í¬í•˜ì—¬ InGroundê°€ ì•„ë‹ˆë©´ PakrourActionì„ ì‹¤í–‰í•œë‹¤. 
+// (ParkourAction ì•ˆì—ëŠ” bAutoClimbê°€ true ì¼ì‹œ ìë™ ì í”„í•˜ëŠ” í•˜ëŠ” ë¡œì§ì´ ìˆë‹¤.)
 void UParkourComponent::TickInGround()
 {
 	if (!OwnerCharacter)
@@ -683,13 +685,13 @@ void UParkourComponent::TickInGround()
 		CheckAddZ = UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, CheckAutoClimbToRoot_Braced, CheckAutoClimbToRoot_FreeHang);
 		
 		FVector WallForwardVector = GetForwardVector(WallRotation);
-		// ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition º¯¼ö¸¦ ÅëÇØ Á¶ÀıÇÑ °æ¿ì TraceÇÒ ±æÀÌµµ Á¶Àı ÇØ¾ßÇÑ´Ù.
+		// ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition ë³€ìˆ˜ë¥¼ í†µí•´ ì¡°ì ˆí•œ ê²½ìš° Traceí•  ê¸¸ì´ë„ ì¡°ì ˆ í•´ì•¼í•œë‹¤.
 		float CustomClimbXYPostion = UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition);	
 		FVector ClimbXYPostionVector = WallForwardVector * (CustomClimbXYPostion/2);
 		CheckInGroundLocation = FVector(RootSocketLocation.X + ClimbXYPostionVector.X, RootSocketLocation.Y + ClimbXYPostionVector.Y, RootSocketLocation.Z + CheckAddZ);
 
 
-		// Climb Àü¿ë Check Ground
+		// Climb ì „ìš© Check Ground
 		bInGround = UKismetSystemLibrary::BoxTraceSingle(GetWorld(), CheckInGroundLocation, CheckInGroundLocation,
 			CheckInGroundSize_Climb, FRotator(0.f, 0.f, 0.f),
 			ParkourTraceType, false, TArray<AActor*>(), DDT_CheckInGround, InGroundHitResult, true);
@@ -711,7 +713,7 @@ void UParkourComponent::TickInGround()
 		{
 			bCanManuelClimb = true;
 			bCanAutoClimb = true;
-			ResetParkourHitResult_Tick(); // ¶¥¿¡ ÀÖÀ¸¹Ç·Î ÃÊ±âÈ­
+			ResetParkourHitResult_Tick(); // ë•…ì— ìˆìœ¼ë¯€ë¡œ ì´ˆê¸°í™”
 		}
 	}
 	else if(bAlwaysParkour)
@@ -721,7 +723,7 @@ void UParkourComponent::TickInGround()
 	}
 }
 
-// FHitResult ÀüºÎ ÃÊ±âÈ­
+// FHitResult ì „ë¶€ ì´ˆê¸°í™”
 void UParkourComponent::ResetParkourHitResult()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -742,7 +744,7 @@ void UParkourComponent::ResetParkourHitResult()
 
 void UParkourComponent::ResetParkourHitResult_Tick()
 {
-	// #ifdef DEBUG_PARKOURCOMPONENT »óÅÂÀÏ¶§ Tick¿¡¼­ ½ÇÇàÇÏ´Â ResetParkourHitResult Log°¡ ¶ßÁö ¾Ê±â À§ÇÔ.
+	// #ifdef DEBUG_PARKOURCOMPONENT ìƒíƒœì¼ë•Œ Tickì—ì„œ ì‹¤í–‰í•˜ëŠ” ResetParkourHitResult Logê°€ ëœ¨ì§€ ì•Šê¸° ìœ„í•¨.
 
 	WallHitTraces.Empty();
 	HopHitTraces.Empty();
@@ -755,8 +757,8 @@ void UParkourComponent::ResetParkourHitResult_Tick()
 	HopClimbLedgeHitResult.Init();
 }
 
-// ParkourCheckWallShape¿¡¼­ »ç¿ë
-// Climb »óÅÂ¿Í ¹ĞÁ¢ÇÑ °ü°è¸¦ °¡Áö°í ÀÖ´Â ÇÔ¼ö. Parkour Climb »óÅÂ°¡ ¾Æ´Ï¶ó¸é ±×³É ¼³Á¤ÇØµĞ °ªÀ» return ÇÑ´Ù.
+// ParkourCheckWallShapeì—ì„œ ì‚¬ìš©
+// Climb ìƒíƒœì™€ ë°€ì ‘í•œ ê´€ê³„ë¥¼ ê°€ì§€ê³  ìˆëŠ” í•¨ìˆ˜. Parkour Climb ìƒíƒœê°€ ì•„ë‹ˆë¼ë©´ ê·¸ëƒ¥ ì„¤ì •í•´ë‘” ê°’ì„ return í•œë‹¤.
 float UParkourComponent::GetFirstTraceHeight()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -815,7 +817,7 @@ float UParkourComponent::GetFirstTraceHeight()
 /*-----------------------------------------
 		Set Parkour Action / State
 -------------------------------------------*/
-// ParkourActionTag¸¦ »õ·Ó°Ô Set ÇÏ°í, ±×¿¡ ÇØ´çÇÏ´Â DT¸¦ °¡Á®¿Í¼­ PlayMontage ÇØÁÖ´Â ÇÔ¼ö.
+// ParkourActionTagë¥¼ ìƒˆë¡­ê²Œ Set í•˜ê³ , ê·¸ì— í•´ë‹¹í•˜ëŠ” DTë¥¼ ê°€ì ¸ì™€ì„œ PlayMontage í•´ì£¼ëŠ” í•¨ìˆ˜.
 void UParkourComponent::SetParkourAction(FName NewParkourActionName)
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -912,13 +914,13 @@ void UParkourComponent::PlayParkourMontage()
 	}
 
 
-	// ÆÄÄí¸£ ¸ùÅ¸ÁÖ¸¦ ½ÇÇàÇÏ¸é¼­ ½ºÅ×ÀÌÆ® º¯°æ
-	// ParkourInState -> ÇØ´ç ¸ùÅ¸ÁÖÀÇ »óÅÂ
-	// ParkourInOut -> ¸ùÅ¸ÁÖ°¡ ³¡³ª¸é µÅ¾ßÇÒ »óÅÂ 
+	// íŒŒì¿ ë¥´ ëª½íƒ€ì£¼ë¥¼ ì‹¤í–‰í•˜ë©´ì„œ ìŠ¤í…Œì´íŠ¸ ë³€ê²½
+	// ParkourInState -> í•´ë‹¹ ëª½íƒ€ì£¼ì˜ ìƒíƒœ
+	// ParkourInOut -> ëª½íƒ€ì£¼ê°€ ëë‚˜ë©´ ë¼ì•¼í•  ìƒíƒœ 
 	// ex)In : Matle -> Out : NotBusy / in : ReachLedge -> Out :Climb
 	SetParkourState(ParkourVariables.ParkourInState);
 
-	bCanParkour = false; // ÆÄÄí¸£ ½ÇÇàÁß
+	bCanParkour = false; // íŒŒì¿ ë¥´ ì‹¤í–‰ì¤‘
 
 	// Play MotionWarping
 	MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("ParkourTop"),
@@ -941,8 +943,8 @@ void UParkourComponent::PlayParkourMontage()
 	
 }
 
-// Parkour State¿¡ µû¸¥ Movement Component »óÅÂ º¯È­
-// ¶Ç´Â Privious State¿¡ µû¸¥ °¢ ParkourState »óÅÂ¿¡ µû¶ó Camera, Spring Arm »óÅÂ º¯È­
+// Parkour Stateì— ë”°ë¥¸ Movement Component ìƒíƒœ ë³€í™”
+// ë˜ëŠ” Privious Stateì— ë”°ë¥¸ ê° ParkourState ìƒíƒœì— ë”°ë¼ Camera, Spring Arm ìƒíƒœ ë³€í™”
 void UParkourComponent::SetParkourState(FGameplayTag NewParkourState)
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -957,7 +959,7 @@ void UParkourComponent::SetParkourState(FGameplayTag NewParkourState)
 	ParkourStateTag = NewParkourState;
 	AnimInstance->SetParkourState(NewParkourState);
 
-	/* ¡Ú ÇöÀç ÆÄÄí¸£ »óÅÂ¸¦ Ç¥½Ã ÇÏ·Á¸é ¿©±â¼­ widget ¼Â¾÷ */
+	/* â˜… í˜„ì¬ íŒŒì¿ ë¥´ ìƒíƒœë¥¼ í‘œì‹œ í•˜ë ¤ë©´ ì—¬ê¸°ì„œ widget ì…‹ì—… */
 	BP_SetParkourStateWidget();
 
 	FindMontageStartTime();
@@ -1004,7 +1006,7 @@ void UParkourComponent::SetParkourState(FGameplayTag NewParkourState)
 	}
 }
 
-/* Hand Location ¶Ç´Â Spring Arm ComponentÀÇ À§Ä¡ ¹× ±æÀÌ Á¶Àı*/
+/* Hand Location ë˜ëŠ” Spring Arm Componentì˜ ìœ„ì¹˜ ë° ê¸¸ì´ ì¡°ì ˆ*/
 void UParkourComponent::PreviousStateCameraSetting(FGameplayTag PreviousState, FGameplayTag NewParkourState)
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -1029,21 +1031,21 @@ void UParkourComponent::PreviousStateCameraSetting(FGameplayTag PreviousState, F
 		}
 		else if (UPSFunctionLibrary::CompGameplayTagName(NewParkourState, TEXT("Parkour.State.Mantle")))
 		{
-			// ¸Ç Ã³À½ À§Ä¡ ¹× ±æÀÌ·Î Á¶Àı
+			// ë§¨ ì²˜ìŒ ìœ„ì¹˜ ë° ê¸¸ì´ë¡œ ì¡°ì ˆ
 			LerpTargetCameraRelativeLocation = FirstCameraLocation;
 			LerpTargetArmLength = FirstTargetArmLength;
 			LerpCameraTimerStart(CameraCurveTimeMax);
 		}
 		else if (UPSFunctionLibrary::CompGameplayTagName(NewParkourState, TEXT("Parkour.State.NotBusy")))
 		{
-			// ¸Ç Ã³À½ À§Ä¡ ¹× ±æÀÌ·Î Á¶Àı
+			// ë§¨ ì²˜ìŒ ìœ„ì¹˜ ë° ê¸¸ì´ë¡œ ì¡°ì ˆ
 			LerpTargetCameraRelativeLocation = FirstCameraLocation;
 			LerpTargetArmLength = FirstTargetArmLength;
 			LerpCameraTimerStart(CameraCurveTimeMax);
 		}
 
 	}
-	// Climb »óÅÂ°¡ µÈ °æ¿ì, Ä«¸Ş¶ó ¿¬Ãâ
+	// Climb ìƒíƒœê°€ ëœ ê²½ìš°, ì¹´ë©”ë¼ ì—°ì¶œ
 	else if(UPSFunctionLibrary::CompGameplayTagName(PreviousState, TEXT("Parkour.State.NotBusy")))
 	{
 		if (UPSFunctionLibrary::CompGameplayTagName(NewParkourState, TEXT("Parkour.State.ReachLedge")))
@@ -1066,7 +1068,7 @@ void UParkourComponent::LerpCameraTimerStart(float FinishTime)
 	
 }
 
-// LerpTargetCameraRelativeLocation, LerpTargetArmLength º¯¼ö¿¡ ÀúÀåµÈ °ªÀ¸·Î Interp ½ÇÇà
+// LerpTargetCameraRelativeLocation, LerpTargetArmLength ë³€ìˆ˜ì— ì €ì¥ëœ ê°’ìœ¼ë¡œ Interp ì‹¤í–‰
 void UParkourComponent::LerpCameraPosition()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -1079,12 +1081,12 @@ void UParkourComponent::LerpCameraPosition()
 		CameraCurveAlpha = 0.5f;
 
 
-	// Camera Location º¯°æ
+	// Camera Location ë³€ê²½
 	FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
 	FVector LocationDiff = LerpTargetCameraRelativeLocation - CameraLocation;
 	SpringArmComponent->SetRelativeLocation(CameraLocation + (LocationDiff * CameraCurveAlpha));
 
-	// Target Arm Length º¯°æ
+	// Target Arm Length ë³€ê²½
 	float TargetArmLengthDiff = LerpTargetArmLength - SpringArmComponent->TargetArmLength;
 	SpringArmComponent->TargetArmLength = SpringArmComponent->TargetArmLength + (TargetArmLengthDiff * CameraCurveAlpha);
 
@@ -1111,7 +1113,7 @@ void UParkourComponent::FindMontageStartTime()
 		ParkourActionTag == UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Action.FreeHangClimb")))
 
 	{
-		// InGround »óÅÂ°¡ ¾Æ´Ï¶ó¸é ´Ù¸¥ StartPos¸¦ »ç¿ëÇÏ´Â ¿É¼Ç
+		// InGround ìƒíƒœê°€ ì•„ë‹ˆë¼ë©´ ë‹¤ë¥¸ StartPosë¥¼ ì‚¬ìš©í•˜ëŠ” ì˜µì…˜
 		if (!bInGround)
 			MontageStartTime = ParkourVariables.FallingMontageStartPos;
 		else
@@ -1121,7 +1123,7 @@ void UParkourComponent::FindMontageStartTime()
 		MontageStartTime = ParkourVariables.MontageStartPos;
 }
 
-// Parkour State Tag°¡ º¯°æµÇ¸é¼­ º¯°æµÇ¾î¾ßÇÒ Äİ¸®Àü ¹× ¹«ºê¸ÕÆ®, ½ºÇÁ¸µ ¾ÏÀÇ Äİ¸®Àü Å×½ºÆ® µîÀÇ ¼³Á¤À» ¸Ã´Â ÇÔ¼ö.
+// Parkour State Tagê°€ ë³€ê²½ë˜ë©´ì„œ ë³€ê²½ë˜ì–´ì•¼í•  ì½œë¦¬ì „ ë° ë¬´ë¸Œë¨¼íŠ¸, ìŠ¤í”„ë§ ì•”ì˜ ì½œë¦¬ì „ í…ŒìŠ¤íŠ¸ ë“±ì˜ ì„¤ì •ì„ ë§¡ëŠ” í•¨ìˆ˜.
 void UParkourComponent::ParkourStateSettings(ECollisionEnabled::Type NewCollisionType, EMovementMode NewMovementMode, FRotator NewRotationRate, bool bDoCollisionTest, bool bStopMovementImmediately)
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -1149,7 +1151,7 @@ void UParkourComponent::BlendingOut_SetParkourState(UAnimMontage* animMontage, b
 #endif
 
 	// ParkourOutState
-	// ºí·»µù ¾Æ¿ôÀ» ÇÏ¸é¼­ ¸ùÅ¸ÁÖ°¡ ³¡³ª¸é¼­ º¯°æÇØ¾ßÇÒ Parkour State º¯°æ
+	// ë¸”ë Œë”© ì•„ì›ƒì„ í•˜ë©´ì„œ ëª½íƒ€ì£¼ê°€ ëë‚˜ë©´ì„œ ë³€ê²½í•´ì•¼í•  Parkour State ë³€ê²½
 	SetParkourState(ParkourVariables.ParkourOutState);
 	SetParkourAction(TEXT("Parkour.Action.NoAction"));	
 	bCanParkour = true;
@@ -1165,21 +1167,21 @@ void UParkourComponent::ParkourMontageEnded(UAnimMontage* animMontage, bool bInt
 /*------------------------------------------------------
 		Motaion Warping Location Calculator
 --------------------------------------------------------*/
-// ¸ÇÃ³À½ º®ÀÇ Top Warp À§Ä¡¸¦ °è»êÇÏ´Â ÇÔ¼ö
+// ë§¨ì²˜ìŒ ë²½ì˜ Top Warp ìœ„ì¹˜ë¥¼ ê³„ì‚°í•˜ëŠ” í•¨ìˆ˜
 FVector UParkourComponent::FindWarpTopLocation(float WarpXOffset, float WarpZOffset)
 {
 	return WallTopHitResult.ImpactPoint + (GetForwardVector(WallRotation) * WarpXOffset)
 		+ FVector(0.f, 0.f, WarpZOffset);
 }
 
-// Àå¾Ö¹°ÀÇ ³¡ºÎºĞ À§Ä¡¸¦ ±âÁØÀ¸·Î ÇÑ À§Ä¡ °è»ê
+// ì¥ì• ë¬¼ì˜ ëë¶€ë¶„ ìœ„ì¹˜ë¥¼ ê¸°ì¤€ìœ¼ë¡œ í•œ ìœ„ì¹˜ ê³„ì‚°
 FVector UParkourComponent::FindWarpDepthLocation(float WarpXOffset, float WarpZOffset)
 {
 	return WallDepthHitResult.ImpactPoint + (GetForwardVector(WallRotation) * WarpXOffset)
 		+ FVector(0.f, 0.f, WarpZOffset);
 }
 
-// Àå¾Ö¹° ÂøÁö ÁöÁ¡ À§Ä¡¸¦ ±âÁØÀ¸·Î ÇÑ °è»ê
+// ì¥ì• ë¬¼ ì°©ì§€ ì§€ì  ìœ„ì¹˜ë¥¼ ê¸°ì¤€ìœ¼ë¡œ í•œ ê³„ì‚°
 FVector UParkourComponent::FindWarpVaultLocation(float WarpXOffset, float WarpZOffset)
 {
 
@@ -1188,7 +1190,7 @@ FVector UParkourComponent::FindWarpVaultLocation(float WarpXOffset, float WarpZO
 }
 
 
-// MantleÀÌ °¡´ÉÇÑÁö ¿ì¼± Àå¾Ö¹°ÀÇ WarpXOffset À§Ä¡¸¸Å­ ¾ÕÀ» °Ë»çÇÏ¿© Ä³¸¯ÅÍ°¡ ¹ßÀ» µğµô¼ö ÀÖ´ÂÁö ÆÇ´Ü
+// Mantleì´ ê°€ëŠ¥í•œì§€ ìš°ì„  ì¥ì• ë¬¼ì˜ WarpXOffset ìœ„ì¹˜ë§Œí¼ ì•ì„ ê²€ì‚¬í•˜ì—¬ ìºë¦­í„°ê°€ ë°œì„ ë””ë”œìˆ˜ ìˆëŠ”ì§€ íŒë‹¨
 FVector UParkourComponent::FindWarpMantleLocation(float WarpXOffset, float WarpZOffset)
 {
 	FVector BasePos = WallTopHitResult.ImpactPoint + GetForwardVector(WallRotation) * WarpXOffset;
@@ -1204,7 +1206,7 @@ FVector UParkourComponent::FindWarpMantleLocation(float WarpXOffset, float WarpZ
 		return WallTopHitResult.ImpactPoint + FVector(0.f, 0.f, WarpZOffset);
 }
 
-// Top LocationÀÌ ÇÊ¿äÇÑµ¥ ´Ù¸¥ °ªÀ¸·Î ÇÊ¿äÇÑ °æ¿ì¸¦ À§ÇÑ ÀÓ½Ã ÇÔ¼ö
+// Top Locationì´ í•„ìš”í•œë° ë‹¤ë¥¸ ê°’ìœ¼ë¡œ í•„ìš”í•œ ê²½ìš°ë¥¼ ìœ„í•œ ì„ì‹œ í•¨ìˆ˜
 FVector UParkourComponent::FindWarpTopLocation_Temp(float WarpXOffset, float WarpZOffset)
 {
 	return WallTopHitResult.ImpactPoint + GetForwardVector(WallRotation) * WarpXOffset
@@ -1246,7 +1248,7 @@ void UParkourComponent::CheckClimbStyle()
 	LOG(Warning, TEXT("CheckClimbStyle"));
 #endif
 
-	// Braced¸ğµåÀÎÁö FreeHang¸ğµåÀÎÁöµµ Ã¼Å©
+	// Bracedëª¨ë“œì¸ì§€ FreeHangëª¨ë“œì¸ì§€ë„ ì²´í¬
 	FVector BasePos = WallTopHitResult.ImpactPoint + FVector(0.f, 0.f, CheckClimbStyle_ZHeight);
 	FVector ForwardVector = UKismetMathLibrary::GetForwardVector(WallRotation);
 	FVector StartPos = BasePos + ForwardVector * -10.f;
@@ -1269,7 +1271,7 @@ void UParkourComponent::SetClimbStyle(FName ClimbStyleName)
 	LOG(Warning, TEXT("SetClimbStyle"));
 #endif
 
-	// ÇöÀç ClimbStyle°ú °°Àº°æ¿ì ret
+	// í˜„ì¬ ClimbStyleê³¼ ê°™ì€ê²½ìš° ret
 	if (UPSFunctionLibrary::CompGameplayTagName(ClimbStyleTag, ClimbStyleName))
 		return;
 
@@ -1277,15 +1279,15 @@ void UParkourComponent::SetClimbStyle(FName ClimbStyleName)
 	AnimInstance->SetClimbStyle(ClimbStyleTag);
 }
 
-// ClimbMovement¸¦ À§ÇØ º® ¸ğ¼­¸®ÀÇ Á¤¸é°ú ¼öÁ÷À» °Ë»ç
+// ClimbMovementë¥¼ ìœ„í•´ ë²½ ëª¨ì„œë¦¬ì˜ ì •ë©´ê³¼ ìˆ˜ì§ì„ ê²€ì‚¬
 void UParkourComponent::ClimbLedgeResult()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
 	LOG(Warning, TEXT("ClimbLedgeResult"));
 #endif
 
-	// Ä³¸¯ÅÍ¿ÍÀÇ °Å¸®°¡ °¡Àå ÂªÀº º®ÀÇ Á¤º¸¸¦ °¡Áø Wall Hit Result¸¦ ÀÌ¿ëÇÔ.
-	// Ä³¸¯ÅÍ ¹Ù·Î ¾Õ Àå¾Ö¹°ÀÇ ForwardVector¸¦ ÀÌ¿ëÇÏ±â À§ÇÔ.
+	// ìºë¦­í„°ì™€ì˜ ê±°ë¦¬ê°€ ê°€ì¥ ì§§ì€ ë²½ì˜ ì •ë³´ë¥¼ ê°€ì§„ Wall Hit Resultë¥¼ ì´ìš©í•¨.
+	// ìºë¦­í„° ë°”ë¡œ ì• ì¥ì• ë¬¼ì˜ ForwardVectorë¥¼ ì´ìš©í•˜ê¸° ìœ„í•¨.
 	FVector ForwardNormalVector = UKismetMathLibrary::GetForwardVector(UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(WallHitResult.ImpactNormal));
 	FVector WallHitStartPos = WallHitResult.ImpactPoint + (ForwardNormalVector * -30.f);
 	FVector WallHitEndPos = WallHitResult.ImpactPoint + (ForwardNormalVector * 30.f);
@@ -1302,8 +1304,8 @@ void UParkourComponent::ClimbLedgeResult()
 	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 5.f, ParkourTraceType, false, TArray<AActor*>(), DDT_ClimbLedgeResultInspection, ClimbLedgeResult_Second, true);
 	
 	ClimbLedgeHitResult = ClimbLedgeResult_First;
-	ClimbLedgeHitResult.Location = ClimbLedgeResult_Second.Location; // ±³Ã¼
-	ClimbLedgeHitResult.ImpactPoint.Z = ClimbLedgeResult_Second.ImpactPoint.Z; // ±³Ã¼
+	ClimbLedgeHitResult.Location = ClimbLedgeResult_Second.Location; // êµì²´
+	ClimbLedgeHitResult.ImpactPoint.Z = ClimbLedgeResult_Second.ImpactPoint.Z; // êµì²´
 	
 }
 
@@ -1311,8 +1313,8 @@ void UParkourComponent::ClimbLedgeResult()
 /*---------------------------
 		Check Surface
 ----------------------------*/
-// Mantle ÇÒ ¼öÀÖ´Â Ç¥¸éÀÎÁö Check
-// ²À Áö»ó¿¡ ¹ßÀ» µó°íÀÖ´Â »óÅÂ»Ó¸¸ ¾Æ´Ñ, Climb »óÅÂ¿¡¼­ ¿Ã¶ó°¥¶§µµ MantleÀÌ Àû¿ëµÈ´Ù.
+// Mantle í•  ìˆ˜ìˆëŠ” í‘œë©´ì¸ì§€ Check
+// ê¼­ ì§€ìƒì— ë°œì„ ë”›ê³ ìˆëŠ” ìƒíƒœë¿ë§Œ ì•„ë‹Œ, Climb ìƒíƒœì—ì„œ ì˜¬ë¼ê°ˆë•Œë„ Mantleì´ ì ìš©ëœë‹¤.
 bool UParkourComponent::CheckMantleSurface()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -1330,7 +1332,7 @@ bool UParkourComponent::CheckMantleSurface()
 	return !bHit;
 }
 
-// Climb ÇÒ ¼öÀÖ´Â Ç¥¸éÀÎÁö Check
+// Climb í•  ìˆ˜ìˆëŠ” í‘œë©´ì¸ì§€ Check
 bool UParkourComponent::CheckClimbSurface()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -1349,7 +1351,7 @@ bool UParkourComponent::CheckClimbSurface()
 	return !bHit;
 }
 
-// Vault ÇÒ ¶§ Áö³ª°¥ °ø°£ÀÌ ÀÖ´ÂÁö Check
+// Vault í•  ë•Œ ì§€ë‚˜ê°ˆ ê³µê°„ì´ ìˆëŠ”ì§€ Check
 bool UParkourComponent::CheckVaultSurface()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -1361,7 +1363,7 @@ bool UParkourComponent::CheckVaultSurface()
 	bool bHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(),
 		TraceVector, TraceVector,
 		CheckVaultCapsuleTraceRadius,
-		CheckVaultCapsuleTraceHalfHeight, // Vault¸¦ ½ÃÀüÇÒ ¶§ Ä³¸¯ÅÍ°¡ È¤½Ã À§ÂÊ Àå¾Ö¹°¿¡ ´ê´ÂÁö °Ë»çÇÏ±â À§ÇÔ
+		CheckVaultCapsuleTraceHalfHeight, // Vaultë¥¼ ì‹œì „í•  ë•Œ ìºë¦­í„°ê°€ í˜¹ì‹œ ìœ„ìª½ ì¥ì• ë¬¼ì— ë‹¿ëŠ”ì§€ ê²€ì‚¬í•˜ê¸° ìœ„í•¨
 		ParkourTraceType, false, TArray<AActor*>(), DDT_CheckVaultSurface, VaultHitResult, true);
 
 	return !bHit;
@@ -1373,7 +1375,7 @@ bool UParkourComponent::CheckClimbMovementSurface(FHitResult MovementHitResult)
 	FVector ArrowForwardVector = GetForwardVector(ArrowActorWorldRotation);
 	FVector ArrowRightVector = GetRightVector(ArrowActorWorldRotation);
 
-	// ÀÔ·Â¹æÇâ Ã¼Å©
+	// ì…ë ¥ë°©í–¥ ì²´í¬
 	float HorizontalAxisLength = GetHorizontalAxis() * ClimbMovementObstacleCheckDistance;
 
 	FVector BasePos = MovementHitResult.ImpactPoint + (ArrowRightVector * HorizontalAxisLength) + FVector(0.f, 0.f, -90.f);
@@ -1416,59 +1418,59 @@ void UParkourComponent::MontageLeftHandIK()
 	LOG(Warning, TEXT("MontageLeftHandIK"));
 #endif
 
-	// ClimbLedgeHitResult : Ã£¾Æ³½ ¿ÀºêÁ§Æ®¸¦ ¼öÁ÷À¸·Î ´Ù½Ã Àç°Ë»çÇÏ¿© ÀâÀ» ¼ö ÀÖ´Â À§Ä¡ÀÇ Á¤º¸.
+	// ClimbLedgeHitResult : ì°¾ì•„ë‚¸ ì˜¤ë¸Œì íŠ¸ë¥¼ ìˆ˜ì§ìœ¼ë¡œ ë‹¤ì‹œ ì¬ê²€ì‚¬í•˜ì—¬ ì¡ì„ ìˆ˜ ìˆëŠ” ìœ„ì¹˜ì˜ ì •ë³´.
 	FHitResult LedgeResult = ClimbLedgeHitResult;
 	FVector WallForwardVector = GetForwardVector(WallRotation);
 	FVector WallRightVector = GetRightVector(WallRotation);
 
 	if(LedgeResult.bBlockingHit)
 	{
-		/* ÃÖÁ¾ÀûÀ¸·Î AnimInstance->SetLeftHandLedgeLocation / RotationÀ» ÇÏ´Â À§Ä¡ */
+		/* ìµœì¢…ì ìœ¼ë¡œ AnimInstance->SetLeftHandLedgeLocation / Rotationì„ í•˜ëŠ” ìœ„ì¹˜ */
 		FVector TargetLeftHandLedgeLocation;
 		FRotator TagetLeftHandLedgeRotation;
 
 		for (int32 i = 0; i <= 4; i++)
 		{
-			/* WallRotationÀÇ LedgeResult.ImpactPoint + Forward Vector ¹æÇâÀ» ±âÁØÀ¸·Î 
-			Left·Î LeftIndex * -2¸¸Å­, -CheckClimbWidth ¸¸Å­ Trace*/ 
+			/* WallRotationì˜ LedgeResult.ImpactPoint + Forward Vector ë°©í–¥ì„ ê¸°ì¤€ìœ¼ë¡œ 
+			Leftë¡œ LeftIndex * -2ë§Œí¼, -CheckClimbWidth ë§Œí¼ Trace*/ 
 			int32 LeftIndex = i * -2;
 
-			FVector WallRotation_Left = WallRightVector * (ClimbIKHandSpace - LeftIndex);  // Left´Â À½¼ö, Right´Â ¾ç¼ö
+			FVector WallRotation_Left = WallRightVector * (ClimbIKHandSpace - LeftIndex);  // LeftëŠ” ìŒìˆ˜, RightëŠ” ì–‘ìˆ˜
 			FVector StartPos = LedgeResult.ImpactPoint + (WallForwardVector * -CheckClimbForward) + WallRotation_Left;
 			FVector EndPos = LedgeResult.ImpactPoint + (WallForwardVector * CheckClimbForward) + WallRotation_Left;
 			
 			FHitResult LeftClimbHitResult;
 			UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 5.f, ParkourTraceType, false, TArray<AActor*>(), DDT_LeftClimbHandIK, LeftClimbHitResult, true);
 
-			// TrueÀÎ °æ¿ì : IK°¡ °¡´ÉÇÔ.
+			// Trueì¸ ê²½ìš° : IKê°€ ê°€ëŠ¥í•¨.
 			if (LeftClimbHitResult.bBlockingHit)
 			{
 				FRotator LeftClimbHitResultNormalRotator = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(LeftClimbHitResult.ImpactNormal);
 				FVector LeftClimbHitResultForwardVector = GetForwardVector(LeftClimbHitResultNormalRotator);
 			
 				FHitResult LeftClimbHitResult_ZResult;
-				// ImpactNormal·Î Rotation¹æÇâÀÇ ForwardVector * 2 + ImpactPointÀÇ À§Ä¡ºÎÅÍ j¹ø¸¸Å­ j * 5ÀÇ Z°ªÀ§Ä¡¸¦ °Ë»çÇÑ´Ù.
+				// ImpactNormalë¡œ Rotationë°©í–¥ì˜ ForwardVector * 2 + ImpactPointì˜ ìœ„ì¹˜ë¶€í„° jë²ˆë§Œí¼ j * 5ì˜ Zê°’ìœ„ì¹˜ë¥¼ ê²€ì‚¬í•œë‹¤.
 				for (int32 j = 0; j <= 5; j++)
 				{
-					// ÀâÀ» ¼ö ÀÖ´Â À§Ä¡¿¡¼­ºÎÅÍ (ImpactNormal_ForwardVector * 2.f) + FVector(0.f, 0.f, j * 5) °£°İ¸¸Å­ ¼öÁ÷ ¾Æ·¡ÂÊÀ¸·Î Trace				
+					// ì¡ì„ ìˆ˜ ìˆëŠ” ìœ„ì¹˜ì—ì„œë¶€í„° (ImpactNormal_ForwardVector * 2.f) + FVector(0.f, 0.f, j * 5) ê°„ê²©ë§Œí¼ ìˆ˜ì§ ì•„ë˜ìª½ìœ¼ë¡œ Trace				
 					FVector ImpactNormal_StartPos = LeftClimbHitResult.ImpactPoint + (LeftClimbHitResultForwardVector * 2.f) + FVector(0.f, 0.f, j * 5);
 					FVector ImpactNormal_EndPos = ImpactNormal_StartPos - FVector(0.f, 0.f, (j * 5) + 50.f);
 					UKismetSystemLibrary::SphereTraceSingle(GetWorld(), ImpactNormal_StartPos, ImpactNormal_EndPos, 2.5f, ParkourTraceType, false, TArray<AActor*>(), DDT_LeftClimbHandIK, LeftClimbHitResult_ZResult, true);
 				
 
-					// TrueÀÏ½Ã : bStartPenetratingÀÏ½Ã IK¸¦ ÇØ¾ßÇÏ´Â À§Ä¡ ¹× È¸Àü°ª Àü´Ş 
-					// Áß¿äÇÑ Á¡Àº LeftClimbHitResult_ZResultÀÌ ¾Æ´Ñ À§ÀÇ LeftClimbHitResult.ImpactPoint °ªÀ» ÀÌ¿ëÇÑ´Ù´Â Á¡ÀÌ´Ù.
-					// bStartPenetrating·Î ÆÇ´ÜÇÏ´Â ÀÌÀ¯´Â bBlockingHit¿Í ´Ş¸® bStartPenetratingrk true¶ó´Â °ÍÀº BlockingÀÌ ¾Æ´Ñ °ãÃÄÁ®¼­ Ä§Åõ°¡ µÇ¾ú´Ù´Â °ÍÀÌ±â¶§¹®¿¡
-					// ÇöÀç °Ë»çÇÏ´Â À§Ä¡º¸´Ù º®ÀÌ ´õ ³ô°Å³ª ÇÏ´Â µîÀÇ ÀÌÀ¯·Î ´õ À­ºÎºĞÀ» °Ë»ç ÇØ¾ßÇÑ´Ù´Â °ÍÀ» ÆÄ¾ÇÇÒ ¼ö ÀÖ±â ¶§¹®ÀÌ´Ù.
+					// Trueì¼ì‹œ : bStartPenetratingì¼ì‹œ IKë¥¼ í•´ì•¼í•˜ëŠ” ìœ„ì¹˜ ë° íšŒì „ê°’ ì „ë‹¬ 
+					// ì¤‘ìš”í•œ ì ì€ LeftClimbHitResult_ZResultì´ ì•„ë‹Œ ìœ„ì˜ LeftClimbHitResult.ImpactPoint ê°’ì„ ì´ìš©í•œë‹¤ëŠ” ì ì´ë‹¤.
+					// bStartPenetratingë¡œ íŒë‹¨í•˜ëŠ” ì´ìœ ëŠ” bBlockingHitì™€ ë‹¬ë¦¬ bStartPenetratingrk trueë¼ëŠ” ê²ƒì€ Blockingì´ ì•„ë‹Œ ê²¹ì³ì ¸ì„œ ì¹¨íˆ¬ê°€ ë˜ì—ˆë‹¤ëŠ” ê²ƒì´ê¸°ë•Œë¬¸ì—
+					// í˜„ì¬ ê²€ì‚¬í•˜ëŠ” ìœ„ì¹˜ë³´ë‹¤ ë²½ì´ ë” ë†’ê±°ë‚˜ í•˜ëŠ” ë“±ì˜ ì´ìœ ë¡œ ë” ìœ—ë¶€ë¶„ì„ ê²€ì‚¬ í•´ì•¼í•œë‹¤ëŠ” ê²ƒì„ íŒŒì•…í•  ìˆ˜ ìˆê¸° ë•Œë¬¸ì´ë‹¤.
 					if (LeftClimbHitResult_ZResult.bStartPenetrating)
 					{
-						// ¸¶Áö¸· ±îÁö ÁøÇàÇÏ¿© 
+						// ë§ˆì§€ë§‰ ê¹Œì§€ ì§„í–‰í•˜ì—¬ 
 						if (j == 5)
 						{
 							TargetLeftHandLedgeLocation =
 								FVector(LeftClimbHitResult.ImpactPoint.X, LeftClimbHitResult.ImpactPoint.Y, LeftClimbHitResult.ImpactPoint.Z - 9.f);
 
-							TagetLeftHandLedgeRotation = FRotator(LeftClimbHitResultNormalRotator + Additive_LeftClimbIKHandRotation); // ¾Ö´Ï¸ŞÀÌ¼Ç¸¶´Ù È¸Àü°ª ´Ù¸§
+							TagetLeftHandLedgeRotation = FRotator(LeftClimbHitResultNormalRotator + Additive_LeftClimbIKHandRotation); // ì• ë‹ˆë©”ì´ì…˜ë§ˆë‹¤ íšŒì „ê°’ ë‹¤ë¦„
 
 							LastLeftHandIKTargetLocation = TargetLeftHandLedgeLocation;
 
@@ -1478,13 +1480,13 @@ void UParkourComponent::MontageLeftHandIK()
 					}
 					else if (LeftClimbHitResult_ZResult.bBlockingHit)
 					{
-						// CharacterHandThicknessÀ» »©´Â ÀÌÀ¯´Â º®¿¡ µü ¸ÂÃç¼­ IKÀ§Ä¡°¡ °è»êµÇ¾ú±â ¶§¹®¿¡ ¼Õ µÎ²²¸¦ »ı°¢ÇØ¼­ Á¶±İ ´õ µÚ·Î °¡µµ·Ï ÇÔ
+						// CharacterHandThicknessì„ ë¹¼ëŠ” ì´ìœ ëŠ” ë²½ì— ë”± ë§ì¶°ì„œ IKìœ„ì¹˜ê°€ ê³„ì‚°ë˜ì—ˆê¸° ë•Œë¬¸ì— ì† ë‘ê»˜ë¥¼ ìƒê°í•´ì„œ ì¡°ê¸ˆ ë” ë’¤ë¡œ ê°€ë„ë¡ í•¨
 						float HandFrontDiff = UKismetMathLibrary::SelectFloat(BracedHandFrontDiff, 0.f, UPSFunctionLibrary::CompGameplayTagName(ClimbStyleTag, TEXT("Parkour.ClimbStyle.Braced")))
 							+ -CharacterHandThickness;
 
 						FVector AddHandFrontLocation = LeftClimbHitResult.ImpactPoint + (LeftClimbHitResultForwardVector * HandFrontDiff);
 
-						// ZÃà¿¡¼­ CharacterHeightDiff, CharacterHandUpDiff °ªÀ» ´õÇØ¼­ ÃÖÁ¾ÀûÀÎ IK Location ±¸ÇÏ±â
+						// Zì¶•ì—ì„œ CharacterHeightDiff, CharacterHandUpDiff ê°’ì„ ë”í•´ì„œ ìµœì¢…ì ì¸ IK Location êµ¬í•˜ê¸°
 						TargetLeftHandLedgeLocation =
 							FVector(AddHandFrontLocation.X, AddHandFrontLocation.Y,
 								(LeftClimbHitResult.ImpactPoint.Z + CharacterHeightDiff + CharacterHandUpDiff - 9.f));
@@ -1501,7 +1503,7 @@ void UParkourComponent::MontageLeftHandIK()
 					}					
 				}
 
-				break; // ÇÊ¼ö
+				break; // í•„ìˆ˜
 			}
 		}	
 	}	
@@ -1513,19 +1515,19 @@ void UParkourComponent::MontageLeftFootIK()
 	LOG(Warning, TEXT("MontageLeftFootIK"));
 #endif
 
-	// Foot IK´Â Climb »óÅÂ°¡ BracedÀÏ ¶§¸¸ À¯È¿ÇÏ´Ù.
+	// Foot IKëŠ” Climb ìƒíƒœê°€ Bracedì¼ ë•Œë§Œ ìœ íš¨í•˜ë‹¤.
 	if (UPSFunctionLibrary::CompGameplayTagName(ClimbStyleTag, TEXT("Parkour.ClimbStyle.Braced")))
 	{
 		FVector WallForwardVector = GetForwardVector(WallRotation);
 		FVector WallRightVector = GetRightVector(WallRotation);
 
-		// ¼öµ¿ZÃà¿¡ FootIKÇÏ´Â À§Ä¡ »©ÁÖ±â
+		// ìˆ˜ë™Zì¶•ì— FootIKí•˜ëŠ” ìœ„ì¹˜ ë¹¼ì£¼ê¸°
 		FVector FootIKLocation = FVector(0.f, 0.f, CharacterHeightDiff - CharacterFootIKLocation);
 
 		FHitResult LedgeResult = ClimbLedgeHitResult;
 		for (int32 cnt = 0; cnt <= 2; cnt++)
 		{					
-			// ZÃàÀ¸·Î ´õÇØ°¡¸ç, Left FootÀÌ À§Ä¡ÇÒ ¹æÇâ¿¡¼­ ZÃàÀ¸·Î ¼øÂ÷ÀûÀ¸·Î Trace ÁøÇà (ÇÊ¿äÇÑ °á°ú¸¦ ¾òÀ¸¸é ¹İº¹ TraceÇÒ ÇÊ¿äx)
+			// Zì¶•ìœ¼ë¡œ ë”í•´ê°€ë©°, Left Footì´ ìœ„ì¹˜í•  ë°©í–¥ì—ì„œ Zì¶•ìœ¼ë¡œ ìˆœì°¨ì ìœ¼ë¡œ Trace ì§„í–‰ (í•„ìš”í•œ ê²°ê³¼ë¥¼ ì–»ìœ¼ë©´ ë°˜ë³µ Traceí•  í•„ìš”x)
 			FVector BasePos =
 				FVector(0.f, 0.f, cnt * 5) + LedgeResult.ImpactPoint
 				+ FootIKLocation
@@ -1538,19 +1540,19 @@ void UParkourComponent::MontageLeftFootIK()
 			bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 10.f, ParkourTraceType, false, TArray<AActor*>(), DDT_LeftClimbFootIK, ClimbFootHitResult, true);
 			if (bHit)
 			{
-				//Ã£¾Æ³½ Foot IK Location¿¡¼­ »ç¿ëÀÚ°¡ ÁöÁ¤ ÇÒ ¼öÀÖ´Â BracedFootAddForward_Left º¯¼öÀÇ °ª±îÁö ´õÇÏ¿© ¾Ö´Ô ÀÎ½ºÅÏ½º¿¡ ÃÖÁ¾ À§Ä¡ Àü´Ş
+				//ì°¾ì•„ë‚¸ Foot IK Locationì—ì„œ ì‚¬ìš©ìê°€ ì§€ì • í•  ìˆ˜ìˆëŠ” BracedFootAddForward_Left ë³€ìˆ˜ì˜ ê°’ê¹Œì§€ ë”í•˜ì—¬ ì• ë‹˜ ì¸ìŠ¤í„´ìŠ¤ì— ìµœì¢… ìœ„ì¹˜ ì „ë‹¬
 				FVector ClimbFootHitResult_ForwardVector = GetForwardVector(UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(ClimbFootHitResult.ImpactNormal));
 				FVector LeftFootLocation = ClimbFootHitResult.ImpactPoint + (ClimbFootHitResult_ForwardVector * -BracedFootAddThickness_Left);
 				
 				AnimInstance->SetLeftFootLocation(LeftFootLocation);
 				break;
 			}
-			else if (cnt == 2) // false : Ã£Áö ¸øÇÔ
+			else if (cnt == 2) // false : ì°¾ì§€ ëª»í•¨
 			{
-				// ´õ ³ĞÀº ¹üÀ§·Î °Ë»ç
+				// ë” ë„“ì€ ë²”ìœ„ë¡œ ê²€ì‚¬
 				for (int cnt2 = 0; cnt2 <= 4; cnt2++)
 				{
-					// for¹® ÀÎµ¦½º °ªÀ» ÀÌ¿ëÇÏ¿© ZÃàÀ» ´õÇØ°¡¸ç °Ë»ç
+					// forë¬¸ ì¸ë±ìŠ¤ ê°’ì„ ì´ìš©í•˜ì—¬ Zì¶•ì„ ë”í•´ê°€ë©° ê²€ì‚¬
 					FVector SecondBasePos = LedgeResult.ImpactPoint + FootIKLocation + FVector(0.f, 0.f,  (cnt2 * 5));
 					FVector SecondStartPos = SecondBasePos + (WallForwardVector * -30.f);
 					FVector SecondEndPos = SecondBasePos + (WallForwardVector * 30.f);
@@ -1602,7 +1604,7 @@ void UParkourComponent::MontageRightHandIK()
 	
 	if (LedgeResult.bBlockingHit)
 	{
-		/* ÃÖÁ¾ÀûÀ¸·Î AnimInstance->SetLeftHandLedgeLocation / RotationÀ» ÇÏ´Â À§Ä¡ */
+		/* ìµœì¢…ì ìœ¼ë¡œ AnimInstance->SetLeftHandLedgeLocation / Rotationì„ í•˜ëŠ” ìœ„ì¹˜ */
 		FVector TargetRightHandLedgeLocation;
 		FRotator TagetRightHandLedgeRotation;
 
@@ -1623,7 +1625,7 @@ void UParkourComponent::MontageRightHandIK()
 				FVector RightClimbHitResultForwardVector = GetForwardVector(RightClimbHitResultNormalRotator);
 				
 				FHitResult RightClimbHitResult_ZResult;
-				// ImpactNormal·Î Rotation¹æÇâÀÇ ForwardVector * 2 + ImpactPointÀÇ À§Ä¡ºÎÅÍ j¹ø¸¸Å­ j * 5ÀÇ Z°ªÀ§Ä¡¸¦ °Ë»çÇÑ´Ù.
+				// ImpactNormalë¡œ Rotationë°©í–¥ì˜ ForwardVector * 2 + ImpactPointì˜ ìœ„ì¹˜ë¶€í„° jë²ˆë§Œí¼ j * 5ì˜ Zê°’ìœ„ì¹˜ë¥¼ ê²€ì‚¬í•œë‹¤.
 				for (int32 j = 0; j <= 5; j++)
 				{
 					FVector ImpactNormal_StartPos = RightClimbHitResult.ImpactPoint + (RightClimbHitResultForwardVector * 2.f) + FVector(0.f, 0.f, j * 5);
@@ -1637,7 +1639,7 @@ void UParkourComponent::MontageRightHandIK()
 							TargetRightHandLedgeLocation =
 								FVector(RightClimbHitResult.ImpactPoint.X, RightClimbHitResult.ImpactPoint.Y, RightClimbHitResult.ImpactPoint.Z - 9.f);
 
-							TagetRightHandLedgeRotation = FRotator(RightClimbHitResultNormalRotator + Additive_RightClimbIKHandRotation); // ¾Ö´Ï¸ŞÀÌ¼Ç¸¶´Ù È¸Àü°ªÀÌ ´Ù¸£´Ù.
+							TagetRightHandLedgeRotation = FRotator(RightClimbHitResultNormalRotator + Additive_RightClimbIKHandRotation); // ì• ë‹ˆë©”ì´ì…˜ë§ˆë‹¤ íšŒì „ê°’ì´ ë‹¤ë¥´ë‹¤.
 
 							LastRightHandIKTargetLocation = TargetRightHandLedgeLocation;
 
@@ -1647,12 +1649,12 @@ void UParkourComponent::MontageRightHandIK()
 					}
 					else if (RightClimbHitResult_ZResult.bBlockingHit)
 					{
-						// CharacterHandThicknessÀ» »©´Â ÀÌÀ¯´Â º®¿¡ µü ¸ÂÃç¼­ IKÀ§Ä¡°¡ °è»êµÇ¾ú±â ¶§¹®¿¡ ¼Õ µÎ²²¸¦ »ı°¢ÇØ¼­ Á¶±İ ´õ µÚ·Î °¡µµ·Ï ÇÔ
+						// CharacterHandThicknessì„ ë¹¼ëŠ” ì´ìœ ëŠ” ë²½ì— ë”± ë§ì¶°ì„œ IKìœ„ì¹˜ê°€ ê³„ì‚°ë˜ì—ˆê¸° ë•Œë¬¸ì— ì† ë‘ê»˜ë¥¼ ìƒê°í•´ì„œ ì¡°ê¸ˆ ë” ë’¤ë¡œ ê°€ë„ë¡ í•¨
 						float HandFrontDiff = UKismetMathLibrary::SelectFloat(BracedHandFrontDiff, 0.f, UPSFunctionLibrary::CompGameplayTagName(ClimbStyleTag, TEXT("Parkour.ClimbStyle.Braced")))
 							+ -CharacterHandThickness;
 						FVector AddHandFrontLocation = RightClimbHitResult.ImpactPoint + (RightClimbHitResultForwardVector * HandFrontDiff);
 
-						// ZÃà¿¡¼­ CharacterHeightDiff, CharacterHandUpDiff °ªÀ» ´õ ÇØ¼­ IK ÁøÇà
+						// Zì¶•ì—ì„œ CharacterHeightDiff, CharacterHandUpDiff ê°’ì„ ë” í•´ì„œ IK ì§„í–‰
 						TargetRightHandLedgeLocation =
 							FVector(AddHandFrontLocation.X, AddHandFrontLocation.Y, (RightClimbHitResult.ImpactPoint.Z + CharacterHeightDiff + CharacterHandUpDiff - 9.f));
 
@@ -1668,7 +1670,7 @@ void UParkourComponent::MontageRightHandIK()
 					}
 				}
 
-				break; // ÇÊ¼ö
+				break; // í•„ìˆ˜
 			}
 		}
 	}
@@ -1685,7 +1687,7 @@ void UParkourComponent::MontageRightFootIK()
 		FVector WallForwardVector = GetForwardVector(WallRotation);
 		FVector WallRightVector = GetRightVector(WallRotation);
 
-		// ¼öµ¿ZÃà¿¡ FootIKÇÏ´Â À§Ä¡ »©ÁÖ±â
+		// ìˆ˜ë™Zì¶•ì— FootIKí•˜ëŠ” ìœ„ì¹˜ ë¹¼ì£¼ê¸°
 		FVector FootIKLocation = FVector(0.f, 0.f, CharacterHeightDiff - CharacterFootIKLocation);
 
 		FHitResult LedgeResult = ClimbLedgeHitResult;
@@ -1715,7 +1717,7 @@ void UParkourComponent::MontageRightFootIK()
 				{
 					for (int cnt2 = 0; cnt2 <= 4; cnt2++)
 					{
-						// for¹® ÀÎµ¦½º °ªÀ» ÀÌ¿ëÇÏ¿© ZÃàÀ» ´õÇØ°¡¸ç °Ë»ç
+						// forë¬¸ ì¸ë±ìŠ¤ ê°’ì„ ì´ìš©í•˜ì—¬ Zì¶•ì„ ë”í•´ê°€ë©° ê²€ì‚¬
 						FVector SecondBasePos = LedgeResult.ImpactPoint + FootIKLocation + FVector(0.f, 0.f, (cnt2 * 5));
 						FVector SecondStartPos = SecondBasePos + (WallForwardVector * -30.f);
 						FVector SecondEndPos = SecondBasePos + (WallForwardVector * 30.f);
@@ -1778,7 +1780,7 @@ void UParkourComponent::ParkourLeftHandIK(FVector CharacterForwardVec, FVector C
 
 	FVector LeftIKHandSocketLoc = OwnerCharacter->GetMesh()->GetSocketLocation(LeftIKHandSocketName);
 
-	// ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition º¯¼ö¸¦ ÅëÇØ Á¶ÀıÇÑ °æ¿ì TraceÇÒ ±æÀÌµµ Á¶Àı ÇØ¾ßÇÑ´Ù.
+	// ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition ë³€ìˆ˜ë¥¼ í†µí•´ ì¡°ì ˆí•œ ê²½ìš° Traceí•  ê¸¸ì´ë„ ì¡°ì ˆ í•´ì•¼í•œë‹¤.
 	float CustomClimbXYPostion = UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition);
 
 	for (int32 i = 0; i <= 4; i++)
@@ -1790,13 +1792,13 @@ void UParkourComponent::ParkourLeftHandIK(FVector CharacterForwardVec, FVector C
 			+ (CharacterRightVec * (-ClimbIKHandSpace + IndexCnt - SameDirection));
 
 		int32 IndexHeightCnt = i * 10;
-		LeftIKHandBasePos -= FVector(0.f, 0.f, IndexHeightCnt); // Z°ª ±îÁö º¯°æ
+		LeftIKHandBasePos -= FVector(0.f, 0.f, IndexHeightCnt); // Zê°’ ê¹Œì§€ ë³€ê²½
 
 
 		FVector LeftIKHandStartPos = LeftIKHandBasePos + (CharacterForwardVec * (-10 + CustomClimbXYPostion));
 		FVector LeftIKHandEndPos = LeftIKHandBasePos + (CharacterForwardVec * (30 + -CustomClimbXYPostion));
 
-		// º® Ã¼Å©
+		// ë²½ ì²´í¬
 		FHitResult Ht_LeftHandWall;
 		UKismetSystemLibrary::SphereTraceSingle(GetWorld(),
 			LeftIKHandStartPos, LeftIKHandEndPos, 10.f,
@@ -1813,7 +1815,7 @@ void UParkourComponent::ParkourLeftHandIK(FVector CharacterForwardVec, FVector C
 				FVector TraceStartLoc = TraceBaseLoc + FVector(0.f, 0.f, IndexCnt2);
 				FVector TraceEndLoc = TraceStartLoc - FVector(0.f, 0.f, 50.f + IndexCnt2);
 			
-				/* Wall Top °è»ê */
+				/* Wall Top ê³„ì‚° */
 				FHitResult LeftHandWallTopHitResult;
 				UKismetSystemLibrary::SphereTraceSingle(GetWorld(),
 					TraceStartLoc, TraceEndLoc, 2.5f,
@@ -1824,7 +1826,7 @@ void UParkourComponent::ParkourLeftHandIK(FVector CharacterForwardVec, FVector C
 					float ClimbStyleHandHeight = UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, BracedHandMovementHeight, FreeHangHandMovementHeight);
 
 					/* Set Left Hand Ledge Location */
-					// ±¸ÇÑ Top À§Ä¡¿¡ »ç¿ëÀÚ°¡ ¼öµ¿ÀûÀ¸·Î ÀÛ¼ºÇÑ º¯¼öµéÀ» ´õÇØ ÃÖÁ¾ÀûÀÎ À§Ä¡°ª ¾ò¾î¿À±â
+					// êµ¬í•œ Top ìœ„ì¹˜ì— ì‚¬ìš©ìê°€ ìˆ˜ë™ì ìœ¼ë¡œ ì‘ì„±í•œ ë³€ìˆ˜ë“¤ì„ ë”í•´ ìµœì¢…ì ì¸ ìœ„ì¹˜ê°’ ì–»ì–´ì˜¤ê¸°
 					float LeftHandLedgeLocactionZ =
 						LeftHandWallTopHitResult.ImpactPoint.Z + ClimbStyleHandHeight
 						+ CharacterHeightDiff + CharacterHandUpDiff
@@ -1832,8 +1834,8 @@ void UParkourComponent::ParkourLeftHandIK(FVector CharacterForwardVec, FVector C
 
 					
 
-					// XÃà ¹æÇâ¸¸ ³ÀµÎ°í À¸·Î È¸Àü°ª »ı¼º
-					// ImpactNormal VectorÀÇ XÃàÀÇ È¸Àü ¹æÇâÀ» ¹Ş¾Æ¿Â´Ù.
+					// Xì¶• ë°©í–¥ë§Œ ëƒ…ë‘ê³  ìœ¼ë¡œ íšŒì „ê°’ ìƒì„±
+					// ImpactNormal Vectorì˜ Xì¶•ì˜ íšŒì „ ë°©í–¥ì„ ë°›ì•„ì˜¨ë‹¤.
 					FRotator LeftHandWallMakeRotX = MakeXRotator(Ht_LeftHandWall.ImpactNormal);
 
 					FVector LeftHandWallForwardVec = GetForwardVector(LeftHandWallMakeRotX);
@@ -1847,7 +1849,7 @@ void UParkourComponent::ParkourLeftHandIK(FVector CharacterForwardVec, FVector C
 
 
 					/* Set Left Hand Ledge Rotation */
-					// ReversDeltaRotator¸¦ ÇØ¾ßÇÏ´Â ÀÌÀ¯´Â ImpactNomal°ªÀÇ È¸Àü°ªÀ» ¹İ´ë·Î µ¹·Á¾ß ¼ÕÀÇ ¹æÇâÀÌ ¸Â±â ¶§¹®
+					// ReversDeltaRotatorë¥¼ í•´ì•¼í•˜ëŠ” ì´ìœ ëŠ” ImpactNomalê°’ì˜ íšŒì „ê°’ì„ ë°˜ëŒ€ë¡œ ëŒë ¤ì•¼ ì†ì˜ ë°©í–¥ì´ ë§ê¸° ë•Œë¬¸
 					FRotator ReversDeltaRotator = UPSFunctionLibrary::ReversDeltaRotator(LeftHandWallMakeRotX);
 					FRotator LeftHandLedgeRotationQuat = ReversDeltaRotator + Additive_LeftClimbIKHandRotation;
 					AnimInstance->SetLeftHandLedgeRotation(LeftHandLedgeRotationQuat);
@@ -1875,7 +1877,7 @@ void UParkourComponent::ParkourRightHandIK(FVector CharacterForwardVec, FVector 
 
 	FVector RightIKHandSocketLoc = OwnerCharacter->GetMesh()->GetSocketLocation(RightIKHandSocketName);
 
-	// ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition º¯¼ö¸¦ ÅëÇØ Á¶ÀıÇÑ °æ¿ì TraceÇÒ ±æÀÌµµ Á¶Àı ÇØ¾ßÇÑ´Ù.
+	// ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition ë³€ìˆ˜ë¥¼ í†µí•´ ì¡°ì ˆí•œ ê²½ìš° Traceí•  ê¸¸ì´ë„ ì¡°ì ˆ í•´ì•¼í•œë‹¤.
 	float CustomClimbXYPostion = UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition);
 
 	for (int32 i = 0; i <= 4; i++)
@@ -1884,16 +1886,16 @@ void UParkourComponent::ParkourRightHandIK(FVector CharacterForwardVec, FVector 
 
 		FVector RightIKHandBasePos =
 			FVector(RightIKHandSocketLoc.X, RightIKHandSocketLoc.Y, RightIKHandSocketLoc.Z - CharacterHeightDiff)
-			+ (CharacterRightVec * (-1 * (-ClimbIKHandSpace + IndexCnt - SameDirection))); // Right´Â ¿ª¼ö
+			+ (CharacterRightVec * (-1 * (-ClimbIKHandSpace + IndexCnt - SameDirection))); // RightëŠ” ì—­ìˆ˜
 
 		
 		int32 IndexHeightCnt = i * 10;
-		RightIKHandBasePos -= FVector(0.f, 0.f, IndexHeightCnt); // Z°ª ±îÁö º¯°æ
+		RightIKHandBasePos -= FVector(0.f, 0.f, IndexHeightCnt); // Zê°’ ê¹Œì§€ ë³€ê²½
 		
 		FVector RightIKHandStartPos = RightIKHandBasePos + (CharacterForwardVec * (-10 + CustomClimbXYPostion));
 		FVector RightIKHandEndPos = RightIKHandBasePos + (CharacterForwardVec * (30 + -CustomClimbXYPostion));
 
-		// º® Ã¼Å©
+		// ë²½ ì²´í¬
 		FHitResult Ht_RightHandWall;
 		UKismetSystemLibrary::SphereTraceSingle(GetWorld(),
 			RightIKHandStartPos, RightIKHandEndPos, 10.f,
@@ -1927,8 +1929,8 @@ void UParkourComponent::ParkourRightHandIK(FVector CharacterForwardVec, FVector 
 						+ GetRightHandIKModifierGetZ();
 
 
-					// XÃà ¹æÇâ¸¸ ³ÀµÎ°í À¸·Î È¸Àü°ª »ı¼º
-					// ImpactNormal VectorÀÇ XÃàÀÇ È¸Àü ¹æÇâÀ» ¹Ş¾Æ¿Â´Ù.
+					// Xì¶• ë°©í–¥ë§Œ ëƒ…ë‘ê³  ìœ¼ë¡œ íšŒì „ê°’ ìƒì„±
+					// ImpactNormal Vectorì˜ Xì¶•ì˜ íšŒì „ ë°©í–¥ì„ ë°›ì•„ì˜¨ë‹¤.
 					FRotator RightHandWallMakeRotX = MakeXRotator(Ht_RightHandWall.ImpactNormal);
 
 
@@ -1983,9 +1985,9 @@ void UParkourComponent::ParkourLeftFootIK(FVector CharacterForwardVecor, FVector
 			{
 				int32 indexCnt2 = i2 * 5;
 				/*
-					 Left IK Foot (X,Y) À§Ä¡ + (Left Hand - FootPositionToHand) * indexCnt2 (Z) À§Ä¡
-					i_indexCnt2_l¸¦ ZÃà¿¡ ´õÇØÁÖ´Â ÀÌÀ¯´Â Ã¹ °Ë»çÇÏ´Â ºÎºĞÀÌ ºñ¾îÀÖ´Â °æ¿ì
-					ZÃà À§ÂÊÀ¸·Î °Ë»çÇØ°¡¸ç ¹ß µğµô°÷À» Ã£¾Æ °¡±â À§ÇÔÀÌ´Ù.
+					 Left IK Foot (X,Y) ìœ„ì¹˜ + (Left Hand - FootPositionToHand) * indexCnt2 (Z) ìœ„ì¹˜
+					i_indexCnt2_lë¥¼ Zì¶•ì— ë”í•´ì£¼ëŠ” ì´ìœ ëŠ” ì²« ê²€ì‚¬í•˜ëŠ” ë¶€ë¶„ì´ ë¹„ì–´ìˆëŠ” ê²½ìš°
+					Zì¶• ìœ„ìª½ìœ¼ë¡œ ê²€ì‚¬í•´ê°€ë©° ë°œ ë””ë”œê³³ì„ ì°¾ì•„ ê°€ê¸° ìœ„í•¨ì´ë‹¤.
 				*/
 				FVector LeftFootLoc = FVector(LeftIKFootLoc.X, LeftIKFootLoc.Y,
 					((LeftHandLoc.Z + LeftFootPositionToHand) + indexCnt2));
@@ -2004,7 +2006,7 @@ void UParkourComponent::ParkourLeftFootIK(FVector CharacterForwardVecor, FVector
 
 				if (Ht_LeftFootResult.bBlockingHit && !Ht_LeftFootResult.bStartPenetrating)
 				{
-					// ¼³Á¤ÇÑ Offset ¸¸Å­ »©ÁØ À§Ä¡
+					// ì„¤ì •í•œ Offset ë§Œí¼ ë¹¼ì¤€ ìœ„ì¹˜
 					FVector FootDepth = GetForwardVector(MakeXRotator(Ht_LeftFootResult.ImpactNormal)) * FootDepthOffset;
 					FVector TargetIKFootLocation = Ht_LeftFootResult.ImpactPoint - FootDepth;
 					AnimInstance->SetLeftFootLocation(TargetIKFootLocation);
@@ -2034,9 +2036,9 @@ void UParkourComponent::ParkourRightFootIK(FVector CharacterForwardVecor, FVecto
 			{
 				int32 indexCnt2 = i2 * 5;
 				/*
-					 Right IK Foot (X,Y) À§Ä¡ + (Right Hand - RightFootPositionToHand) * indexCnt2 (Z) À§Ä¡
-					i_indexCnt2_l¸¦ ZÃà¿¡ ´õÇØÁÖ´Â ÀÌÀ¯´Â Ã¹ °Ë»çÇÏ´Â ºÎºĞÀÌ ºñ¾îÀÖ´Â °æ¿ì
-					ZÃà À§ÂÊÀ¸·Î °Ë»çÇØ°¡¸ç ¹ß µğµô°÷À» Ã£¾Æ °¡±â À§ÇÔÀÌ´Ù.
+					 Right IK Foot (X,Y) ìœ„ì¹˜ + (Right Hand - RightFootPositionToHand) * indexCnt2 (Z) ìœ„ì¹˜
+					i_indexCnt2_lë¥¼ Zì¶•ì— ë”í•´ì£¼ëŠ” ì´ìœ ëŠ” ì²« ê²€ì‚¬í•˜ëŠ” ë¶€ë¶„ì´ ë¹„ì–´ìˆëŠ” ê²½ìš°
+					Zì¶• ìœ„ìª½ìœ¼ë¡œ ê²€ì‚¬í•´ê°€ë©° ë°œ ë””ë”œê³³ì„ ì°¾ì•„ ê°€ê¸° ìœ„í•¨ì´ë‹¤.
 				*/
 				FVector RightFootLoc = FVector(RightIKFootLoc.X, RightIKFootLoc.Y,
 					((RightHandLoc.Z + RightFootPositionToHand) + indexCnt2));
@@ -2055,7 +2057,7 @@ void UParkourComponent::ParkourRightFootIK(FVector CharacterForwardVecor, FVecto
 
 				if (Ht_RightFootResult.bBlockingHit && !Ht_RightFootResult.bStartPenetrating)
 				{
-					// ¼³Á¤ÇÑ Offset ¸¸Å­ »©ÁØ À§Ä¡
+					// ì„¤ì •í•œ Offset ë§Œí¼ ë¹¼ì¤€ ìœ„ì¹˜
 					FVector FootDepth = GetForwardVector(MakeXRotator(Ht_RightFootResult.ImpactNormal)) * FootDepthOffset;
 					FVector TargetIKFootLocation = Ht_RightFootResult.ImpactPoint - FootDepth;
 					AnimInstance->SetRightFootLocation(TargetIKFootLocation);
@@ -2200,7 +2202,7 @@ void UParkourComponent::AddMovementInput(float ScaleValue, bool bFront)
 
 float UParkourComponent::GetHorizontalAxis()
 {
-	// ¿òÁ÷ÀÓÀÌ Á¸ÀçÇÒ °æ¿ì
+	// ì›€ì§ì„ì´ ì¡´ì¬í•  ê²½ìš°
 	if (ForwardValue != 0.f || RightValue != 0.f)
 	{
 		float HorizontalValue = HorizontalClimbForwardValue + HorizontalClimbRightValue;
@@ -2212,7 +2214,7 @@ float UParkourComponent::GetHorizontalAxis()
 
 float UParkourComponent::GetVerticalAxis()
 {
-	// ¿òÁ÷ÀÓÀÌ Á¸ÀçÇÒ °æ¿ì
+	// ì›€ì§ì„ì´ ì¡´ì¬í•  ê²½ìš°
 	if (ForwardValue != 0.f || RightValue != 0.f)
 	{
 		float HorizontalValue = VerticalClimbForwardValue + VerticalClimbRightValue;
@@ -2253,16 +2255,16 @@ void UParkourComponent::ClimbMovement()
 	FVector RightVectorClimbDistance = GetRightVector(ArrowWorldRotation)
 		* (ClimbMovementDistance * HorizontalAxis); 
 
-	// ClimbMoveCheckDistance º¯¼ö¿¡ ÀÔ·ÂµÈ °ª¸¸Å­ ÇØ´ç À§Ä¡¸¦ °Ë»çÇÏ¿© ClimbMove°¡ °¡´ÉÇÏ¸é ¿òÁ÷ÀÌ´Â °úÁ¤
-	// ÄÚ³Ê »Ó¸¸¾Æ´Ï¶ó »ìÂ¦ µ¹ÃâµÇ°Å³ª µÕ±Ù ¸ğ¾çÀÇ ¸ğ¼­¸®ºÎºĞÀÇ ClimbMove °è»êÇÏ±â À§ÇÔ
-	// À§¿¡¼­ ºÎÅÍ ¾Æ·¡·Î CapsuleTrace·Î °Ë»ç¸¦ ÇÑ´Ù.
+	// ClimbMoveCheckDistance ë³€ìˆ˜ì— ì…ë ¥ëœ ê°’ë§Œí¼ í•´ë‹¹ ìœ„ì¹˜ë¥¼ ê²€ì‚¬í•˜ì—¬ ClimbMoveê°€ ê°€ëŠ¥í•˜ë©´ ì›€ì§ì´ëŠ” ê³¼ì •
+	// ì½”ë„ˆ ë¿ë§Œì•„ë‹ˆë¼ ì‚´ì§ ëŒì¶œë˜ê±°ë‚˜ ë‘¥ê·¼ ëª¨ì–‘ì˜ ëª¨ì„œë¦¬ë¶€ë¶„ì˜ ClimbMove ê³„ì‚°í•˜ê¸° ìœ„í•¨
+	// ìœ„ì—ì„œ ë¶€í„° ì•„ë˜ë¡œ CapsuleTraceë¡œ ê²€ì‚¬ë¥¼ í•œë‹¤.
 
 	bool bCheckFirstForBreak = false;
 	bool bCheckSecondForBreak = false;
 	bool bCheckThirdForBreak = false;
 
 
-	// º®À» Ã£´Â °úÁ¤
+	// ë²½ì„ ì°¾ëŠ” ê³¼ì •
 	for (int32 FirstIndex = 0; FirstIndex <= 2 && !bCheckFirstForBreak; FirstIndex++)
 	{
 		int32 LocalIndex = FirstIndex * -15;
@@ -2273,23 +2275,23 @@ void UParkourComponent::ClimbMovement()
 		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), ClimbMoveCheckStartPos, ClimbMoveCheckEndPos, 5.f, ParkourTraceType, false,
 			TArray<AActor*>(), DDT_ClimbMovementCheck, ClimbMovementHitResult, true);
 
-		// bStartPenetratingÀÌ true¶ó´Â °ÍÀº HitÇÏ±âµµ Àü¿¡ °ãÃÄ¹ö·È´Ù´Â ¶æ
-		// ¸ğÅüÀÌ¿¡¼­ »ìÂ¦ ¸ğ³­ºÎºĞÀÌ ÄÚ³Ê¸¦ µ¹±â¿¡µµ ¾Ö¸ÅÇÏ°í ¹Ù·Î Àâ±âµµ ¾Ö¸ÅÇÑ À§Ä¡ÀÎ °æ¿ì¸¦ ¶æÇÔ
-		// TopÀ» ±¸ÇÏ°Å³ª Corner ÇÔ¼ö¸¦ ½ÇÇàÇÑ´Ù.
+		// bStartPenetratingì´ trueë¼ëŠ” ê²ƒì€ Hití•˜ê¸°ë„ ì „ì— ê²¹ì³ë²„ë ¸ë‹¤ëŠ” ëœ»
+		// ëª¨í‰ì´ì—ì„œ ì‚´ì§ ëª¨ë‚œë¶€ë¶„ì´ ì½”ë„ˆë¥¼ ëŒê¸°ì—ë„ ì• ë§¤í•˜ê³  ë°”ë¡œ ì¡ê¸°ë„ ì• ë§¤í•œ ìœ„ì¹˜ì¸ ê²½ìš°ë¥¼ ëœ»í•¨
+		// Topì„ êµ¬í•˜ê±°ë‚˜ Corner í•¨ìˆ˜ë¥¼ ì‹¤í–‰í•œë‹¤.
 
 		if (!ClimbMovementHitResult.bStartPenetrating)
 		{
-			if (CheckOutCorner()) // Ä³¸¯ÅÍ ¹Ù·Î ¿·¿¡ ÄÚ³Êµ¹¼ö ÀÖ´Â º® Ã¼Å©
+			if (CheckOutCorner()) // ìºë¦­í„° ë°”ë¡œ ì˜†ì— ì½”ë„ˆëŒìˆ˜ ìˆëŠ” ë²½ ì²´í¬
 				OutCornerMovement(); 
-			else // ÄÚ³Ê°¡ ¾Æ´Ñ°æ¿ì or ÄÚ³Ê±ä ÇÏÁö¸¸ Ä³¸¯ÅÍ ¹Ù·Î ¿·¿¡ ¸·È÷´Â º®ÀÌ ¾ø´Â °æ¿ì
+			else // ì½”ë„ˆê°€ ì•„ë‹Œê²½ìš° or ì½”ë„ˆê¸´ í•˜ì§€ë§Œ ìºë¦­í„° ë°”ë¡œ ì˜†ì— ë§‰íˆëŠ” ë²½ì´ ì—†ëŠ” ê²½ìš°
 			{				
-				// bStartPenetratingÀº ¾Æ¿¹ °Ë»ç°¡ µÇÁö¾Ê¾ÒÀ»¶§µµ false¸¦ Ãâ·ÂÇÏ±â¶§¹®¿¡ bBlockingHitÀ» °Ë»ç
-				if (ClimbMovementHitResult.bBlockingHit) // ¡Ú¡Ú Corner°¡ ¾Æ´Ï°í ClimbMove°¡ °¡´ÉÇÔ
+				// bStartPenetratingì€ ì•„ì˜ˆ ê²€ì‚¬ê°€ ë˜ì§€ì•Šì•˜ì„ë•Œë„ falseë¥¼ ì¶œë ¥í•˜ê¸°ë•Œë¬¸ì— bBlockingHitì„ ê²€ì‚¬
+				if (ClimbMovementHitResult.bBlockingHit) // â˜…â˜… Cornerê°€ ì•„ë‹ˆê³  ClimbMoveê°€ ê°€ëŠ¥í•¨
 				{
 					LastLeftHandIKTargetLocation = ClimbMovementHitResult.ImpactPoint;
 					LastRightHandIKTargetLocation = ClimbMovementHitResult.ImpactPoint;
 
-					// ClimbMove°¡ °¡´ÉÇÑ ¸ğ¼­¸®ÀÎ°æ¿ì TraceÇÒ À§Ä¡¿¡ FVector(0.f, 0.f, SecondIndex * 5 + float) ¸¸Å­ ÇØ´ç TopÀ» Ã¼Å©
+					// ClimbMoveê°€ ê°€ëŠ¥í•œ ëª¨ì„œë¦¬ì¸ê²½ìš° Traceí•  ìœ„ì¹˜ì— FVector(0.f, 0.f, SecondIndex * 5 + float) ë§Œí¼ í•´ë‹¹ Topì„ ì²´í¬
 					for (int32 SecondIndex = 0; SecondIndex <= 6 && !bCheckSecondForBreak; SecondIndex++)
 					{
 						FRotator NoramlizeDeltaRotator = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(ClimbMovementHitResult.ImpactNormal);
@@ -2307,7 +2309,7 @@ void UParkourComponent::ClimbMovement()
 
 						if (ClimbMovementTopHitResult.bStartPenetrating)
 						{
-							// ClimbMoveCheck, ClimbMoveTopCheck ÀÌÁß for¹® ¸¶Áö¸·±îÁö °Ë»ç¸¦ ÁøÇàÇÑ °æ¿ì
+							// ClimbMoveCheck, ClimbMoveTopCheck ì´ì¤‘ forë¬¸ ë§ˆì§€ë§‰ê¹Œì§€ ê²€ì‚¬ë¥¼ ì§„í–‰í•œ ê²½ìš°
 							if (SecondIndex == 6 && FirstIndex == 2)
 							{
 								StopClimbMovement();
@@ -2321,11 +2323,11 @@ void UParkourComponent::ClimbMovement()
 							{
 								StopClimbMovement();
 							}						
-							else // Climb¸¦ ÇÏ¸ç ÀÌµ¿ÇÒ¶§ »ìÂ¦ ³ôÀÌ°¡ ³ôÀº ºÎºĞÀÌ ÀÖ´Â °æ¿ì LineTrace·Î °Ë»çÇÏ¿© ÇØ´ç À§Ä¡ CheckÇÏ´Â for¹®
+							else // Climbë¥¼ í•˜ë©° ì´ë™í• ë•Œ ì‚´ì§ ë†’ì´ê°€ ë†’ì€ ë¶€ë¶„ì´ ìˆëŠ” ê²½ìš° LineTraceë¡œ ê²€ì‚¬í•˜ì—¬ í•´ë‹¹ ìœ„ì¹˜ Checkí•˜ëŠ” forë¬¸
 							{
 								bCheckFirstForBreak = true; // break;
 
-								// ³ôÀÌ Ã¼Å© ¡Ú
+								// ë†’ì´ ì²´í¬ â˜…
 								for (int32 ThirdIndex = 0; ThirdIndex <= 5 && !bCheckThirdForBreak; ThirdIndex++)
 								{
 									float Index_Z = (ThirdIndex * 5.f) + 2.f;
@@ -2351,7 +2353,7 @@ void UParkourComponent::ClimbMovement()
 										if(!CheckClimbMovementSurface(ClimbMovementHitResult))
 										{
 											StopClimbMovement();
-											return; // ¿·¿¡ ¹«¾ğ°¡ ÀÖ´Ù´Â °ÍÀÌ±â ¶§¹®¿¡ ´õ °Ë»çÇÒ ÇÊ¿ä°¡ ¾ø´Ù.
+											return; // ì˜†ì— ë¬´ì–¸ê°€ ìˆë‹¤ëŠ” ê²ƒì´ê¸° ë•Œë¬¸ì— ë” ê²€ì‚¬í•  í•„ìš”ê°€ ì—†ë‹¤.
 										}
 										else 
 										{
@@ -2368,12 +2370,12 @@ void UParkourComponent::ClimbMovement()
 						}							
 					}
 				}
-				else // ClimbMovementHitResult.bBlockingHit°¡ falseÀÎ °æ¿ì. Ä³¸¯ÅÍ¸¦ ¸·Áö¾Ê´Â ÄÚ³Ê¸¦ ¸¸³­ °æ¿ì
+				else // ClimbMovementHitResult.bBlockingHitê°€ falseì¸ ê²½ìš°. ìºë¦­í„°ë¥¼ ë§‰ì§€ì•ŠëŠ” ì½”ë„ˆë¥¼ ë§Œë‚œ ê²½ìš°
 				{
 					if (FirstIndex == 2)
 					{
 						if (!UPSFunctionLibrary::CompGameplayTagName(ParkourActionTag, TEXT("Parkour.Action.CornerMove")))
-							InCornerMovement(); // Corner Move »óÅÂ°¡ ¾Æ´Ñ°æ¿ì
+							InCornerMovement(); // Corner Move ìƒíƒœê°€ ì•„ë‹Œê²½ìš°
 						else
 						{
 							#ifdef DEBUG_MOVEMENT
@@ -2474,7 +2476,7 @@ void UParkourComponent::SetClimbDirection(FName NewClimbDirectionName)
 
 void UParkourComponent::GetClimbForwardValue(float ScaleValue, float& HorizontalClimbForward, float& VerticalClimbForward)
 {
-	// Climb»óÅÂ¿¡¼­ ¿òÁ÷ÀÏ ¶§ ÄÁÆ®·Ñ·¯ÀÇ »ó´ëÀû ¹æÇâ¿¡µû¶ó ¿òÁ÷ÀÏ °ÍÀÎÁö
+	// Climbìƒíƒœì—ì„œ ì›€ì§ì¼ ë•Œ ì»¨íŠ¸ë¡¤ëŸ¬ì˜ ìƒëŒ€ì  ë°©í–¥ì—ë”°ë¼ ì›€ì§ì¼ ê²ƒì¸ì§€
 	if (bUseControllerRotation_Climb)
 	{
 		FRotator ControlRotation = OwnerCharacter->GetControlRotation();
@@ -2483,9 +2485,9 @@ void UParkourComponent::GetClimbForwardValue(float ScaleValue, float& Horizontal
 		float DeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(ControlRotation, CharacterRotation).Yaw;
 
 		/* 
-		Cos0µµ´Â °ªÀÌ 1ÀÌ´Ù.Áï, 0µµ´Â °°Àº ¹æÇâÀ¸·Î ´­·¶´Ù´Â ¶æÀÌ¹Ç·Î
-		Àü¹æ, ÈÄ¹æÀ» ³ªÅ¸³»´Â Vertical¿¡´Â CosÀ», ±× ¹İ´ëÀÎ HorizontalÀº SinÀ» ±¸ÇÑ´Ù. 
-		Cos°ú SinÀº ¹İºñ·Ê ÇÏ±â¶§¹®.
+		Cos0ë„ëŠ” ê°’ì´ 1ì´ë‹¤.ì¦‰, 0ë„ëŠ” ê°™ì€ ë°©í–¥ìœ¼ë¡œ ëˆŒë €ë‹¤ëŠ” ëœ»ì´ë¯€ë¡œ
+		ì „ë°©, í›„ë°©ì„ ë‚˜íƒ€ë‚´ëŠ” Verticalì—ëŠ” Così„, ê·¸ ë°˜ëŒ€ì¸ Horizontalì€ Sinì„ êµ¬í•œë‹¤. 
+		Cosê³¼ Sinì€ ë°˜ë¹„ë¡€ í•˜ê¸°ë•Œë¬¸.
 		*/
 		HorizontalClimbForward = ScaleValue * UKismetMathLibrary::DegSin(DeltaYaw);
 		VerticalClimbForward = ScaleValue * UKismetMathLibrary::DegCos(DeltaYaw);
@@ -2500,7 +2502,7 @@ void UParkourComponent::GetClimbForwardValue(float ScaleValue, float& Horizontal
 
 void UParkourComponent::GetClimbRightValue(float ScaleValue, float& HorizontalClimbRight, float& VerticalClimbRight)
 {
-	// Climb»óÅÂ¿¡¼­ ¿òÁ÷ÀÏ ¶§ ÄÁÆ®·Ñ·¯ÀÇ »ó´ëÀû ¹æÇâ¿¡µû¶ó ¿òÁ÷ÀÏ °ÍÀÎÁö
+	// Climbìƒíƒœì—ì„œ ì›€ì§ì¼ ë•Œ ì»¨íŠ¸ë¡¤ëŸ¬ì˜ ìƒëŒ€ì  ë°©í–¥ì—ë”°ë¼ ì›€ì§ì¼ ê²ƒì¸ì§€
 	if (bUseControllerRotation_Climb)
 	{
 		FRotator ControlRotation = OwnerCharacter->GetControlRotation();
@@ -2509,8 +2511,8 @@ void UParkourComponent::GetClimbRightValue(float ScaleValue, float& HorizontalCl
 		float DeltaYaw = 0.f - UKismetMathLibrary::NormalizedDeltaRotator(ControlRotation, CharacterRotation).Yaw;
 
 		/*
-		Cos0µµ´Â °ªÀÌ 1ÀÌ´Ù.Áï, 0µµ´Â °°Àº ¹æÇâÀ¸·Î ´­·¶´Ù´Â ¶æÀÌ¹Ç·Î
-		¿ŞÂÊ, ¿À¸¥ÂÊÀ» ³ªÅ¸³»´Â Horizontal¿¡´Â CosÀ», ±× ¹İ´ëÀÎ VerticalÀº SinÀ» ±¸ÇÑ´Ù.
+		Cos0ë„ëŠ” ê°’ì´ 1ì´ë‹¤.ì¦‰, 0ë„ëŠ” ê°™ì€ ë°©í–¥ìœ¼ë¡œ ëˆŒë €ë‹¤ëŠ” ëœ»ì´ë¯€ë¡œ
+		ì™¼ìª½, ì˜¤ë¥¸ìª½ì„ ë‚˜íƒ€ë‚´ëŠ” Horizontalì—ëŠ” Così„, ê·¸ ë°˜ëŒ€ì¸ Verticalì€ Sinì„ êµ¬í•œë‹¤.
 		*/
 		HorizontalClimbRight = ScaleValue * UKismetMathLibrary::DegCos(DeltaYaw);
 		VerticalClimbRight = ScaleValue * UKismetMathLibrary::DegSin(DeltaYaw);
@@ -2567,8 +2569,8 @@ void UParkourComponent::ResetMovement()
 	SetClimbDirection(TEXT("Parkour.Direction.NoDirection"));
 }
 
-// Ä³¸¯ÅÍÀÇ Head Socket À§Ä¡¸¦ ÀÌ¿ëÇÏ¿© ClimbLedgeResult() ÇÔ¼ö¿¡¼­ ±¸ÇÑ HitResult.ImpactPoint.Z±îÁöÀÇ
-// Height¸¦ ÅëÇØ ÇöÀç Ä³¸¯ÅÍ°¡ ¶¥¿¡ ÀÖ´ÂÁö °øÁß¿¡ÀÖ´ÂÁö ÆÇ´Ü
+// ìºë¦­í„°ì˜ Head Socket ìœ„ì¹˜ë¥¼ ì´ìš©í•˜ì—¬ ClimbLedgeResult() í•¨ìˆ˜ì—ì„œ êµ¬í•œ HitResult.ImpactPoint.Zê¹Œì§€ì˜
+// Heightë¥¼ í†µí•´ í˜„ì¬ ìºë¦­í„°ê°€ ë•…ì— ìˆëŠ”ì§€ ê³µì¤‘ì—ìˆëŠ”ì§€ íŒë‹¨
 bool UParkourComponent::CheckAirHang()
 {
 	if (ClimbLedgeHitResult.bBlockingHit)
@@ -2632,9 +2634,9 @@ void UParkourComponent::FindDropDownHangLocation()
 
 	if (FindDropDownHitResult.bBlockingHit && !FindDropDownHitResult.bStartPenetrating)
 	{
-		// È¸Àü°ªÀÇ -5.f ¸¸Å­ ¾Æ·¡ÂÊÀÇ ForwardVector ¹æÇâÂÊÀ¸·Î SphereTrace
-		// Ä³¸¯ÅÍ°¡ Climb¸¦ ½Ãµµ ÇÒ¼öÀÖ´Â ÃæºĞÇÑ °ø°£ÀÌ ÀÖ´ÂÁö È®ÀÎ 
-		// À§¿¡¼­ °Ë»çÇÑ Trace´Â Ä³¸¯ÅÍÀÇ ¹Ù·Î ¾Æ·¡ ¶¥ÀÇ Á¤º¸¸¦, ÇØ´ç Á¤º¸¸¦ Åä´ë·Î ¸ğ¼­¸®¸¦ Ã£´Â ¿ªÇÒ
+		// íšŒì „ê°’ì˜ -5.f ë§Œí¼ ì•„ë˜ìª½ì˜ ForwardVector ë°©í–¥ìª½ìœ¼ë¡œ SphereTrace
+		// ìºë¦­í„°ê°€ Climbë¥¼ ì‹œë„ í• ìˆ˜ìˆëŠ” ì¶©ë¶„í•œ ê³µê°„ì´ ìˆëŠ”ì§€ í™•ì¸ 
+		// ìœ„ì—ì„œ ê²€ì‚¬í•œ TraceëŠ” ìºë¦­í„°ì˜ ë°”ë¡œ ì•„ë˜ ë•…ì˜ ì •ë³´ë¥¼, í•´ë‹¹ ì •ë³´ë¥¼ í† ëŒ€ë¡œ ëª¨ì„œë¦¬ë¥¼ ì°¾ëŠ” ì—­í• 
 		FVector ForwardVector = GetForwardVector(GetDesireRotation());
 		FVector StartPos_Second = (FindDropDownHitResult.ImpactPoint + FVector(0.f, 0.f, -5.f)) + (ForwardVector * 100.f);
 		FVector EndPos_Second = StartPos_Second + (ForwardVector * -125.f);
@@ -2642,10 +2644,10 @@ void UParkourComponent::FindDropDownHangLocation()
 		FHitResult FindDropDownHitResult_Second;
 		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos_Second, EndPos_Second, 5.f, ParkourTraceType, false, TArray<AActor*>(), DDT_FindDropDownHangLocation, FindDropDownHitResult_Second, true);
 
-		// ÃÖÁ¾ÀûÀ¸·Î Climb°¡ °¡´ÉÇÑ ÇÑ °÷À» Ã£´Â °úÁ¤
+		// ìµœì¢…ì ìœ¼ë¡œ Climbê°€ ê°€ëŠ¥í•œ í•œ ê³³ì„ ì°¾ëŠ” ê³¼ì •
 		if (FindDropDownHitResult_Second.bBlockingHit && !FindDropDownHitResult_Second.bStartPenetrating)
 		{
-			// Climb°¡ °¡´ÉÇÑ °÷À» Å½»ö
+			// Climbê°€ ê°€ëŠ¥í•œ ê³³ì„ íƒìƒ‰
 			WallHitTraces.Empty();
 			FRotator NormalRotation = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(FindDropDownHitResult_Second.ImpactNormal);
 			FVector ForwardNormalVector = GetForwardVector(NormalRotation);
@@ -2662,7 +2664,7 @@ void UParkourComponent::FindDropDownHangLocation()
 				UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartPos_LineWidth, EndPos_LineWidth, ParkourTraceType, false, TArray<AActor*>(), DDT_FindDropDownHangLocation,  FindDropDownHitResult_Third, true);
 				HopHitTraces.Empty();
 
-				// ÇØ´ç ¶óÀÎ¿¡¼­ ZÃà À§ ÂÊÀ¸·Î Line Trace ÁøÇà
+				// í•´ë‹¹ ë¼ì¸ì—ì„œ Zì¶• ìœ„ ìª½ìœ¼ë¡œ Line Trace ì§„í–‰
 				for (int32 HopCnt = 0; HopCnt <= 12; HopCnt++)
 				{
 					FVector StartPos_HopTrace = FVector(0.f, 0.f, (HopCnt * 8)) + FindDropDownHitResult_Third.TraceStart;
@@ -2674,7 +2676,7 @@ void UParkourComponent::FindDropDownHangLocation()
 					HopHitTraces.Emplace(FindDropDownHitResult_Hop);
 				}
 
-				// À§ ¹İº¹¹®¿¡¼­ Ã£¾Æ³½ °÷¿¡¼­ Distance¸¦ ÆÇº°ÇÏ¿© ÇÏ³ª¸¦ WallHitTraces¿¡ ÀúÀå
+				// ìœ„ ë°˜ë³µë¬¸ì—ì„œ ì°¾ì•„ë‚¸ ê³³ì—ì„œ Distanceë¥¼ íŒë³„í•˜ì—¬ í•˜ë‚˜ë¥¼ WallHitTracesì— ì €ì¥
 				for (int32 Num = 1; Num < HopHitTraces.Num(); Num++)
 				{
 					double VectorDistance_Current = UKismetMathLibrary::Vector_Distance(HopHitTraces[Num].TraceStart, HopHitTraces[Num].TraceEnd);
@@ -2700,15 +2702,15 @@ void UParkourComponent::FindDropDownHangLocation()
 					float CurrentDistance = UKismetMathLibrary::Vector_Distance(WallHitTraces[i].ImpactPoint, CharacterLocation);
 					float PrevDistance = UKismetMathLibrary::Vector_Distance(WallHitResult.ImpactPoint, CharacterLocation);
 
-					// WallHitTraces[i]°¡ Distance°¡ ´õ ÀÛÀº°æ¿ì ÇØ´ç °ªÀ¸·Î WallHitResult °»½Å
-					// ¾Æ´Ñ°æ¿ì¿¡´Â WallHitResult ±×´ë·Î »ç¿ë (¼±ÅÃÁ¤·Ä)
+					// WallHitTraces[i]ê°€ Distanceê°€ ë” ì‘ì€ê²½ìš° í•´ë‹¹ ê°’ìœ¼ë¡œ WallHitResult ê°±ì‹ 
+					// ì•„ë‹Œê²½ìš°ì—ëŠ” WallHitResult ê·¸ëŒ€ë¡œ ì‚¬ìš© (ì„ íƒì •ë ¬)
 					if (CurrentDistance <= PrevDistance)
 						WallHitResult = WallHitTraces[i];
 					
 				}
 			}
 
-			// ¸¶Áö¸·À¸·Î ÇØ´çÀ§Ä¡¿¡ Climb ½ÇÇàÀ» ÇÏ±âÀ§ÇØ TraceÇÏ¿© TopÀ» °Ë»çÇÑµÚ Climb ÇÔ¼ö ½ÇÇà
+			// ë§ˆì§€ë§‰ìœ¼ë¡œ í•´ë‹¹ìœ„ì¹˜ì— Climb ì‹¤í–‰ì„ í•˜ê¸°ìœ„í•´ Traceí•˜ì—¬ Topì„ ê²€ì‚¬í•œë’¤ Climb í•¨ìˆ˜ ì‹¤í–‰
 			if (WallHitResult.bBlockingHit && !WallHitResult.bStartPenetrating)
 			{
 				WallRotation = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(WallHitResult.ImpactNormal);
@@ -2786,7 +2788,7 @@ bool UParkourComponent::CheckOutCorner()
 	if (bOutCornerReturn)
 		OutCornerIndex = LocalOutCornerIndex;
 
-	return bOutCornerReturn; // true -> ClimbMovement ÇÔ¼ö¿¡¼­ OutCornerMovement ÇÔ¼ö ½ÇÇà
+	return bOutCornerReturn; // true -> ClimbMovement í•¨ìˆ˜ì—ì„œ OutCornerMovement í•¨ìˆ˜ ì‹¤í–‰
 }
 
 void UParkourComponent::OutCornerMovement()
@@ -2818,11 +2820,11 @@ void UParkourComponent::OutCornerMovement()
 				TArray<AActor*>(), DDT_OutCornerMovement, OutCornerCheckTopHitResult, true);
 
 			/* 
-				À§¿¡¼­ Corner¸¦ Å½ÁöÇÑ ImpactPoint¿¡¼­ ¹Ù·Î ZÃà¸¸ ´õÇÏ°í »©¼­ ¼öÁ÷À¸·Î °Ë»çÇÑ´Ù.
-				¶§¹®¿¡ °Ë»çÇÏ´Â TraceÀÇ Ã¹ StartPos°¡ º®º¸´Ù À§¿¡ÀÖÁö ¾ÊÀ¸¸é ÀüºÎ´Ù bStartPenetratingÀÌ True Ã³¸®°¡ µÈ´Ù.
-				±×·¡¼­ ÇØ´ç º®ÀÌ °¡´ÉÇÑ º®ÀÎÁö ¾Æ´ÑÁö´Â bStartPenetrating º¯¼ö ÇÏ³ª·Î ÆÇ´ÜÀÌ °¡´ÉÇÏ´Ù. (¡ÚÁß¿ä)
+				ìœ„ì—ì„œ Cornerë¥¼ íƒì§€í•œ ImpactPointì—ì„œ ë°”ë¡œ Zì¶•ë§Œ ë”í•˜ê³  ë¹¼ì„œ ìˆ˜ì§ìœ¼ë¡œ ê²€ì‚¬í•œë‹¤.
+				ë•Œë¬¸ì— ê²€ì‚¬í•˜ëŠ” Traceì˜ ì²« StartPosê°€ ë²½ë³´ë‹¤ ìœ„ì—ìˆì§€ ì•Šìœ¼ë©´ ì „ë¶€ë‹¤ bStartPenetratingì´ True ì²˜ë¦¬ê°€ ëœë‹¤.
+				ê·¸ë˜ì„œ í•´ë‹¹ ë²½ì´ ê°€ëŠ¥í•œ ë²½ì¸ì§€ ì•„ë‹Œì§€ëŠ” bStartPenetrating ë³€ìˆ˜ í•˜ë‚˜ë¡œ íŒë‹¨ì´ ê°€ëŠ¥í•˜ë‹¤. (â˜…ì¤‘ìš”)
 			*/
-			if (OutCornerCheckTopHitResult.bStartPenetrating) // Trace°¡ Ãæµ¹µÈ »óÅÂ·Î ½ÃÀÛµÇ´Â °æ¿ì
+			if (OutCornerCheckTopHitResult.bStartPenetrating) // Traceê°€ ì¶©ëŒëœ ìƒíƒœë¡œ ì‹œì‘ë˜ëŠ” ê²½ìš°
 			{
 				if (i == 4) 
 					StopClimbMovement(); 
@@ -2875,13 +2877,13 @@ void UParkourComponent::InCornerMovement()
 
 		bool bFirstCheckHit = false;
 		bool bBreak = false;
-		int32 CheckHeight = 0; // ArrowActor°¡ º®º¸´Ù À§¿¡ÀÖ´Â °æ¿ì¸¦ ¹æÁö
-		int32 HorizontalWidth = 0; //  Horizontal ¹æÇâÀ¸·Î CheckÇÒ Cnt
+		int32 CheckHeight = 0; // ArrowActorê°€ ë²½ë³´ë‹¤ ìœ„ì—ìˆëŠ” ê²½ìš°ë¥¼ ë°©ì§€
+		int32 HorizontalWidth = 0; //  Horizontal ë°©í–¥ìœ¼ë¡œ Checkí•  Cnt
 		for (int32 i = 0; i <= 5 && !bBreak; i++)
 		{
 			/*
-				¸î¹øÂ°ºÎÅÍ °Ë»çµÇÁö¾Ê´ÂÁö¸¦ CheckÇÏ´Â °úÁ¤ÀÌ´Ù.
-				Check µÇÁö¾ÊÀ» ¶§±îÁö °Ë»çÇÑ´Ù. ¾ÈÂÊÀ¸·Î ÈØ ÄÚ³Ê¶ó°í ÆÇ´ÜÇÏ±â À§ÇÔÀÌ´Ù.
+				ëª‡ë²ˆì§¸ë¶€í„° ê²€ì‚¬ë˜ì§€ì•ŠëŠ”ì§€ë¥¼ Checkí•˜ëŠ” ê³¼ì •ì´ë‹¤.
+				Check ë˜ì§€ì•Šì„ ë•Œê¹Œì§€ ê²€ì‚¬í•œë‹¤. ì•ˆìª½ìœ¼ë¡œ íœœ ì½”ë„ˆë¼ê³  íŒë‹¨í•˜ê¸° ìœ„í•¨ì´ë‹¤.
 			*/
 			
 			
@@ -2894,14 +2896,14 @@ void UParkourComponent::InCornerMovement()
 
 			if (bHit)
 			{
-				// bCheckFirstHitÀ» µû·Î »ç¿ëÇÏ´Â ÀÌÀ¯´Â ¸ğÁ¾ÀÇ ÀÌÀ¯·Î ArrowActor°¡ º®º¸´Ù À§¿¡ ÀÖ´Â °æ¿ì¸¦ À§ÇÔ ex)ClimbStyleBracedZPositionÀÇ º¯°æ µî
-				// ±×·²°æ¿ì ¾Æ·¡ÂÊÀ¸·Î ³»·Á¿À¸ç °Ë»çÇØ¾ßÇÑ´Ù.
+				// bCheckFirstHitì„ ë”°ë¡œ ì‚¬ìš©í•˜ëŠ” ì´ìœ ëŠ” ëª¨ì¢…ì˜ ì´ìœ ë¡œ ArrowActorê°€ ë²½ë³´ë‹¤ ìœ„ì— ìˆëŠ” ê²½ìš°ë¥¼ ìœ„í•¨ ex)ClimbStyleBracedZPositionì˜ ë³€ê²½ ë“±
+				// ê·¸ëŸ´ê²½ìš° ì•„ë˜ìª½ìœ¼ë¡œ ë‚´ë ¤ì˜¤ë©° ê²€ì‚¬í•´ì•¼í•œë‹¤.
 				if (!bFirstCheckHit) 
 					bFirstCheckHit = true;
 
 				if (i == 5)
 				{
-					LocalCornerDepthHitResult = FHitResult(); // In Corner ºÒ°¡
+					LocalCornerDepthHitResult = FHitResult(); // In Corner ë¶ˆê°€
 					StopClimbMovement();
 				}					
 				else
@@ -2910,9 +2912,9 @@ void UParkourComponent::InCornerMovement()
 				HorizontalWidth = i * 10;
 					
 			}
-			else // °Ë»ç µÇÁö ¾ÊÀ¸¹Ç·Î InCorner ÇÔ¼öµé ½ÇÇà
+			else // ê²€ì‚¬ ë˜ì§€ ì•Šìœ¼ë¯€ë¡œ InCorner í•¨ìˆ˜ë“¤ ì‹¤í–‰
 			{
-				if (bFirstCheckHit) // ÇÑ¹øÀÌ¶óµµ HitÇÑ °æ¿ì
+				if (bFirstCheckHit) // í•œë²ˆì´ë¼ë„ Hití•œ ê²½ìš°
 				{
 					bBreak = true;
 					CheckInCornerSide(LocalCornerDepthHitResult,
@@ -2924,8 +2926,8 @@ void UParkourComponent::InCornerMovement()
 				}
 				else
 				{
-					CheckHeight += -10; // ¾Æ¿¹ Ã¼Å©µÇÁö ¾Ê¾ÒÀ¸¹Ç·Î ¾Æ·¡·Î
-					i = 0; // for¹® Ã³À½ºÎÅÍ ´Ù½Ã
+					CheckHeight += -10; // ì•„ì˜ˆ ì²´í¬ë˜ì§€ ì•Šì•˜ìœ¼ë¯€ë¡œ ì•„ë˜ë¡œ
+					i = 0; // forë¬¸ ì²˜ìŒë¶€í„° ë‹¤ì‹œ
 				}
 			}
 		}
@@ -2935,13 +2937,13 @@ void UParkourComponent::InCornerMovement()
 void UParkourComponent::CheckInCornerSide(const FHitResult& CornerDepthHitResult, FVector ArrowActorWorldLocation, FRotator ArrowActorWorldRotation, FVector ArrowForwardVector, FVector ArrowRightVector, float HorizontalAxis)
 {
 	/*
-		InCornerMovementÇÔ¼ö¿¡¼­ º®ÀÌ ÈØ °÷ÀÇ Á¤º¸¸¦ ¾Ë¾Ò´Ù¸é ±× À§Ä¡¸¦ ¼öÁ÷À¸·Î °Ë»çÇÏ¿© Side¸¦ Ã¼Å©ÇÏ´Â °úÁ¤ÀÌ´Ù.
+		InCornerMovementí•¨ìˆ˜ì—ì„œ ë²½ì´ íœœ ê³³ì˜ ì •ë³´ë¥¼ ì•Œì•˜ë‹¤ë©´ ê·¸ ìœ„ì¹˜ë¥¼ ìˆ˜ì§ìœ¼ë¡œ ê²€ì‚¬í•˜ì—¬ Sideë¥¼ ì²´í¬í•˜ëŠ” ê³¼ì •ì´ë‹¤.
 	*/
 
 	bool bBreak = false;
 	for (int32 CheckSideCnt = 0; CheckSideCnt <= 2 && !bBreak; CheckSideCnt++)
 	{
-		// À§·Î ¿Ã¶ó°¡¸é¼­ Ã¼Å©
+		// ìœ„ë¡œ ì˜¬ë¼ê°€ë©´ì„œ ì²´í¬
 		FVector InCornerSideCheckBasePos = CornerDepthHitResult.ImpactPoint
 			+ (ArrowForwardVector * 10.f)
 			+ FVector(0.f, 0.f, CheckSideCnt * -10);
@@ -2968,7 +2970,7 @@ void UParkourComponent::CheckInCornerSide(const FHitResult& CornerDepthHitResult
 void UParkourComponent::CheckInCornerSideTop(const FHitResult& InCornerSideCheckHitResult)
 {
 	/*
-		ÀÌµ¿ÇÒ In Corner ¸ğ¼­¸®ÀÇ TopÀ» Ã¼Å©ÇÑ´Ù
+		ì´ë™í•  In Corner ëª¨ì„œë¦¬ì˜ Topì„ ì²´í¬í•œë‹¤
 	*/
 	FRotator NormalizeRotator = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(InCornerSideCheckHitResult.ImpactNormal);
 	FVector ForwardNormalVector = GetForwardVector(NormalizeRotator);
@@ -2992,7 +2994,7 @@ void UParkourComponent::CheckInCornerSideTop(const FHitResult& InCornerSideCheck
 			if (TopCheckHitResult.bBlockingHit)
 			{
 				/*
-					ÃÖÁ¾ÀûÀ¸·Î Ä³¸¯ÅÍ CapsuleComponent°¡ ÀÌµ¿°¡´ÉÇÑ ÃæºĞÇÑ °ø°£ÀÌ ÀÖ´ÂÁö CheckÇÏ´Â °úÁ¤
+					ìµœì¢…ì ìœ¼ë¡œ ìºë¦­í„° CapsuleComponentê°€ ì´ë™ê°€ëŠ¥í•œ ì¶©ë¶„í•œ ê³µê°„ì´ ìˆëŠ”ì§€ Checkí•˜ëŠ” ê³¼ì •
 				*/
 				FVector CapsuleTracePos = TopCheckHitResult.ImpactPoint
 					+ FVector(0.f, 0.f, -CharacterCapsuleCompHalfHeight)
@@ -3005,7 +3007,7 @@ void UParkourComponent::CheckInCornerSideTop(const FHitResult& InCornerSideCheck
 					ParkourTraceType, false, TArray<AActor*>(),
 					DDT_InCornerMovement, CapsuleTraceHitResult, true);
 
-				// true : CapsuleComponent°¡ ¿òÁ÷ÀÏ °ø°£ÀÌ ¾ø¾î¼­ Stop
+				// true : CapsuleComponentê°€ ì›€ì§ì¼ ê³µê°„ì´ ì—†ì–´ì„œ Stop
 				if (bCapsuleHit)
 					StopClimbMovement();
 				else
@@ -3043,10 +3045,10 @@ void UParkourComponent::CornerMove(FVector TargetRelativeLocation, FRotator Targ
 	SetClimbDirection(UPSFunctionLibrary::SelectClimbDirection(GetHorizontalAxis() > 0.f));
 
 	FLatentActionInfo LatenActionInfo;
-	LatenActionInfo.CallbackTarget = this; // ¡Ú
-	LatenActionInfo.ExecutionFunction = FName(TEXT("CornerMoveCompleted")); // ¿Ï·á ½Ã È£ÃâµÉ ÇÔ¼ö ÀÌ¸§
-	LatenActionInfo.Linkage = 0; // ÀÌ °ªÀº ´ëºÎºĞ 0À¸·Î ¼³Á¤ÇÕ´Ï´Ù.
-	LatenActionInfo.UUID = GetNextLatentActionUUID(); // °íÀ¯ÇÑ ID ÇÒ´ç
+	LatenActionInfo.CallbackTarget = this; // â˜…
+	LatenActionInfo.ExecutionFunction = FName(TEXT("CornerMoveCompleted")); // ì™„ë£Œ ì‹œ í˜¸ì¶œë  í•¨ìˆ˜ ì´ë¦„
+	LatenActionInfo.Linkage = 0; // ì´ ê°’ì€ ëŒ€ë¶€ë¶„ 0ìœ¼ë¡œ ì„¤ì •í•©ë‹ˆë‹¤.
+	LatenActionInfo.UUID = GetNextLatentActionUUID(); // ê³ ìœ í•œ ID í• ë‹¹
 
 	UKismetSystemLibrary::MoveComponentTo(CapsuleComponent, TargetRelativeLocation, TargetRelativeRotation,
 		false, false,
@@ -3080,8 +3082,8 @@ void UParkourComponent::CheckClimbUpOrHop()
 		|| UPSFunctionLibrary::CompGameplayTagName(DirectionGameplayTag, TEXT("Parkour.Direction.ForwardLeft"))
 		|| UPSFunctionLibrary::CompGameplayTagName(DirectionGameplayTag, TEXT("Parkour.Direction.ForwardRight")))
 	{
-		// À§ÂÊÀ¸·Î ¹æÇâÅ°¸¦ ÁöÁ¤ÇÏ¿© ParkourÅ°¸¦ ´©¸¥ »óÅÂÀÏ ¶§, Climb »óÅÂ¿¡¼­ ¿Ã¶ó°¥¼öÀÖ´Â º®ÀÎÁö ÆÇ´Ü.
-		// ¾Æ´Ñ°æ¿ì¿¡ HopÇÒ ¼öÀÖ´Â º®À» Ã£¾Æ¼­ Á¸ÀçÇÒ½Ã Hop ÁøÇà
+		// ìœ„ìª½ìœ¼ë¡œ ë°©í–¥í‚¤ë¥¼ ì§€ì •í•˜ì—¬ Parkourí‚¤ë¥¼ ëˆ„ë¥¸ ìƒíƒœì¼ ë•Œ, Climb ìƒíƒœì—ì„œ ì˜¬ë¼ê°ˆìˆ˜ìˆëŠ” ë²½ì¸ì§€ íŒë‹¨.
+		// ì•„ë‹Œê²½ìš°ì— Hopí•  ìˆ˜ìˆëŠ” ë²½ì„ ì°¾ì•„ì„œ ì¡´ì¬í• ì‹œ Hop ì§„í–‰
 		if (CheckMantleSurface())
 		{
 			if (UPSFunctionLibrary::CompGameplayTagName(ClimbStyleTag, TEXT("Parkour.ClimbStyle.Braced")))
@@ -3105,7 +3107,7 @@ void UParkourComponent::HopAction()
 #endif
 	FirstClimbLedgeResult();
 	
-	FindHopLocation(); // HopÇÒ À§Ä¡ Ã£±â (WallHitResult ¹× WallTopHitResult °»½Å)
+	FindHopLocation(); // Hopí•  ìœ„ì¹˜ ì°¾ê¸° (WallHitResult ë° WallTopHitResult ê°±ì‹ )
 
 	if (IsLedgeValid())
 	{
@@ -3117,7 +3119,7 @@ void UParkourComponent::HopAction()
 }
 
 
-// WallTopResult¿Í WallHitResult´Â ClimbMovement Áß¿¡´Â Empty µÇ±â¶§¹®¿¡ HopÀ» ½ÇÇàÇÏ¸é Top À§Ä¡¸¦ ´Ù½Ã °è»êÇØÁÖ¾î¾ßÇÑ´Ù.
+// WallTopResultì™€ WallHitResultëŠ” ClimbMovement ì¤‘ì—ëŠ” Empty ë˜ê¸°ë•Œë¬¸ì— Hopì„ ì‹¤í–‰í•˜ë©´ Top ìœ„ì¹˜ë¥¼ ë‹¤ì‹œ ê³„ì‚°í•´ì£¼ì–´ì•¼í•œë‹¤.
 void UParkourComponent::FirstClimbLedgeResult()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -3130,7 +3132,7 @@ void UParkourComponent::FirstClimbLedgeResult()
 	FVector CheckHoldingWallStartPos = WallHitResult.ImpactPoint + (ForwardNormalVector * -30.f);
 	FVector CheckHoldingWallEndPos = WallHitResult.ImpactPoint + (ForwardNormalVector * 30.f);
 
-	// WallRotation ¹× TopÀ» ±¸ÇÏ±âÀ§ÇÑ Holding Wall À§Ä¡ ÆÄ¾Ç
+	// WallRotation ë° Topì„ êµ¬í•˜ê¸°ìœ„í•œ Holding Wall ìœ„ì¹˜ íŒŒì•…
 	FHitResult CheckHoldingWallHitResult;
 	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), CheckHoldingWallStartPos, CheckHoldingWallEndPos, 
 		5.f, ParkourTraceType, false, TArray<AActor*>(), DDT_CheckFirstHoldingWall, CheckHoldingWallHitResult, true);
@@ -3154,8 +3156,8 @@ void UParkourComponent::FirstClimbLedgeResult()
 
 }
 
-// Ä³¸¯ÅÍÀÇ ¼öÁ÷À¸·Î ÄÚ³Ê°¡ µÈ ºÎºĞÀ¸·Î HopÀ» ½ÃµµÇÒ¶§ Áß¿äÇÑ ÇÔ¼ö
-// Ä³¸¯ÅÍ À§Ä¡¸¦ ±â¹İÀ¸·Î HopÀ» ÁøÇàÇÒ ¹æÇâÀÇ Depth¸¦ ±¸ÇØ¼­ ÄÚ³Ê°¡ ²ªÀÎ ºÎºĞÀÌ ¾ø´ÂÁö È®ÀÎÇÑ´Ù.
+// ìºë¦­í„°ì˜ ìˆ˜ì§ìœ¼ë¡œ ì½”ë„ˆê°€ ëœ ë¶€ë¶„ìœ¼ë¡œ Hopì„ ì‹œë„í• ë•Œ ì¤‘ìš”í•œ í•¨ìˆ˜
+// ìºë¦­í„° ìœ„ì¹˜ë¥¼ ê¸°ë°˜ìœ¼ë¡œ Hopì„ ì§„í–‰í•  ë°©í–¥ì˜ Depthë¥¼ êµ¬í•´ì„œ ì½”ë„ˆê°€ êº¾ì¸ ë¶€ë¶„ì´ ì—†ëŠ”ì§€ í™•ì¸í•œë‹¤.
 void UParkourComponent::CheckInCornerHop()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -3180,7 +3182,7 @@ void UParkourComponent::CheckInCornerHop()
 
 		FHitResult LocalCornerDepthHitResult;
 
-		// ÄÚ³Ê°¡ ²ªÀÎ ºÎºĞÀÎÁö ÆÇ´ÜÇÏ±â À§ÇÑ for¹®
+		// ì½”ë„ˆê°€ êº¾ì¸ ë¶€ë¶„ì¸ì§€ íŒë‹¨í•˜ê¸° ìœ„í•œ forë¬¸
 		// Depth
 		for (int32 i = 0; i <= 7; i++)
 		{
@@ -3205,7 +3207,7 @@ void UParkourComponent::CheckInCornerHop()
 				}
 				else
 				{
-					// ¸¶Áö¸·À¸·Î HitµÈ º®±îÁö ÀúÀå
+					// ë§ˆì§€ë§‰ìœ¼ë¡œ Hitëœ ë²½ê¹Œì§€ ì €ì¥
 					LocalCornerDepthHitResult = CheckWallDepthHitResult;
 				}
 			}
@@ -3221,7 +3223,7 @@ void UParkourComponent::CheckInCornerHop()
 						OwnerCharacter->GetActorLocation().Z);
 					FVector Height = FVector(0.f, 0.f, IndexCnt2);
 
-					// ¸¶Áö¸·À¸·Î Ã¼Å©µÈ CornerºÎºĞ¿¡¼­ ÄÚ³Ê°¡ ²ªÀÌ´Â ºÎºĞ ¸ğ¾ç´ë·Î ²ªÀÌ´Â ¸é Trace ÁøÇà
+					// ë§ˆì§€ë§‰ìœ¼ë¡œ ì²´í¬ëœ Cornerë¶€ë¶„ì—ì„œ ì½”ë„ˆê°€ êº¾ì´ëŠ” ë¶€ë¶„ ëª¨ì–‘ëŒ€ë¡œ êº¾ì´ëŠ” ë©´ Trace ì§„í–‰
 					FVector CheckCornerBasePos = CornerDepthImpactPoint + Height + (ArrowForwardVector * 10.f);
 					FVector CheckCornerStartPos = CheckCornerBasePos + (ArrowRightVector * (HorizontalAxis * 10.f));
 					FVector CheckCornerEndPos = CheckCornerBasePos + (ArrowRightVector * (HorizontalAxis * -50.f));
@@ -3251,7 +3253,7 @@ void UParkourComponent::CheckInCornerHop()
 	}
 }
 
-// Ä³¸¯ÅÍÀÇ ¼öÆòÀ¸·Î ¸·°íÀÖ´Â º®À¸·Î HopÇÏ±âÀ§ÇÑ À§Ä¡¸¦ ¾ò´Â ÇÔ¼ö
+// ìºë¦­í„°ì˜ ìˆ˜í‰ìœ¼ë¡œ ë§‰ê³ ìˆëŠ” ë²½ìœ¼ë¡œ Hopí•˜ê¸°ìœ„í•œ ìœ„ì¹˜ë¥¼ ì–»ëŠ” í•¨ìˆ˜
 void UParkourComponent::CheckOutCornerHop()
 {
 #ifdef DEBUG_PARKOURCOMPONENT
@@ -3267,7 +3269,7 @@ void UParkourComponent::CheckOutCornerHop()
 
 	float HorizontalAxis = GetHorizontalAxis();
 	if (HorizontalAxis == 0.f)
-		return; // ¼öÆò ÀÔ·Â Ãà °ªÀÌ ¾øÀ¸¹Ç·Î ¿¹¿ÜÃ³¸®
+		return; // ìˆ˜í‰ ì…ë ¥ ì¶• ê°’ì´ ì—†ìœ¼ë¯€ë¡œ ì˜ˆì™¸ì²˜ë¦¬
 
 	for (int32 i = 0; i <= 22; i++)
 	{
@@ -3304,7 +3306,7 @@ FGameplayTag UParkourComponent::SelectHopAction()
 	switch (GetHopDirection())
 	{
 	case FORWARD: 
-		// FORWARDÀÎ °æ¿ì ¸ÕÀú ÄÚ³Ê Ã¼Å©¸¦ ÇÏ°í ÄÚ³ÊÀÎ °æ¿ì ClimbUp º¸´Ù´Â Corner HopÀ» ¸ÕÀú ½ÃµµÇÑ´Ù.
+		// FORWARDì¸ ê²½ìš° ë¨¼ì € ì½”ë„ˆ ì²´í¬ë¥¼ í•˜ê³  ì½”ë„ˆì¸ ê²½ìš° ClimbUp ë³´ë‹¤ëŠ” Corner Hopì„ ë¨¼ì € ì‹œë„í•œë‹¤.
 		if(!(bCanInCornerHop || bCanOutCornerHop))
 			return ReturnBracedHopAction(FORWARD);
 		else
@@ -3364,8 +3366,8 @@ int32 UParkourComponent::GetHopDirection()
 	LOG(Warning, TEXT("GetHopDirection"));
 #endif
 	
-	FVector HopStartLocation = HopClimbLedgeHitResult.ImpactPoint; // Hop ½ÃµµÇÒ ¶§ À§Ä¡
-	FVector HopEndLocation = ClimbLedgeHitResult.ImpactPoint; // HopÇÒ ÃÖÁ¾À§Ä¡
+	FVector HopStartLocation = HopClimbLedgeHitResult.ImpactPoint; // Hop ì‹œë„í•  ë•Œ ìœ„ì¹˜
+	FVector HopEndLocation = ClimbLedgeHitResult.ImpactPoint; // Hopí•  ìµœì¢…ìœ„ì¹˜
 
 	FRotator RelativeRotation = UKismetMathLibrary::FindRelativeLookAtRotation(OwnerCharacter->GetActorTransform(), HopEndLocation);
 	
@@ -3406,8 +3408,8 @@ int32 UParkourComponent::GetHopDesireRotation(int32 HorizontalDirection, int32 V
 {
 	/*
 		UP : 10, Down : -11 // Left : -1, Right : 1
-		ÀÌ·¸°Ô ÃøÁ¤ÇÏ¿©¼­ °¢ °ªÀ» ´õÇÏ¿© 8¹æÇâÀ¸·Î swich¹® ±¸Çö
-		[±âÁ¸ if¹®¿¡¼­ else if¸¦ ÅëÇÑ ÇÏµå ÄÚµù½Ä¿¡¼­ °³¼± (ex. if(...) else if(...) * 7)]
+		ì´ë ‡ê²Œ ì¸¡ì •í•˜ì—¬ì„œ ê° ê°’ì„ ë”í•˜ì—¬ 8ë°©í–¥ìœ¼ë¡œ swichë¬¸ êµ¬í˜„
+		[ê¸°ì¡´ ifë¬¸ì—ì„œ else ifë¥¼ í†µí•œ í•˜ë“œ ì½”ë”©ì‹ì—ì„œ ê°œì„  (ex. if(...) else if(...) * 7)]
 	*/
 
 	return VerticalDirection + HorizontalDirection;
@@ -3449,7 +3451,7 @@ FGameplayTag UParkourComponent::ReturnFreeHangHopAction(int32 Direction)
 	switch (Direction)
 	{
 	case FORWARD:
-		// FreeHangÀº UpÀÌ ¾ø´Ù. (¹°¸®ÀûÀ¸·Î)
+		// FreeHangì€ Upì´ ì—†ë‹¤. (ë¬¼ë¦¬ì ìœ¼ë¡œ)
 		return UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Action.ClimbHopUp"));
 	case BACKWARD:
 		return UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Action.FreeClimbHopDown"));
@@ -3505,7 +3507,7 @@ void UParkourComponent::FindHopLocation()
 
 		HopHitTraces.Empty();
 
-		// Hop °¡´ÉÇÑ À§Ä¡µé Å½»ö
+		// Hop ê°€ëŠ¥í•œ ìœ„ì¹˜ë“¤ íƒìƒ‰
 		for (int32 i2 = 0; i2 <= 20; i2++)
 		{
 			int32 IndexCnt2 = (i2 * CheckHopHeight) - 20;
@@ -3527,10 +3529,10 @@ void UParkourComponent::FindHopLocation()
 void UParkourComponent::CheckHopWallTopHitResult()
 {
 	/*
-		WallHitTraces¿¡ ¾Æ¹«°Íµµ ¾ø´Ù´Â ¶æÀº
-		1. ¾ç ¿·À¸·Î HopÀÌ °¡´ÉÇÑ À§Ä¡°¡ Check µÇÁö¾ÊÀ½.
-		2. Ä³¸¯ÅÍ ¹Ù·Î ¿· ²ªÀÌ´Â ÄÚ³Ê¶ó¼­ bStartPenetratingÀÌ true.
-		3. ¾Æ·¡¿¡ HopÇÒ ¼öÀÖ´Â º®ÀÌ Á¸ÀçÇÏÁö¾Ê¾Æ¼­ DropÇÏ·Á´Â »óÅÂ.
+		WallHitTracesì— ì•„ë¬´ê²ƒë„ ì—†ë‹¤ëŠ” ëœ»ì€
+		1. ì–‘ ì˜†ìœ¼ë¡œ Hopì´ ê°€ëŠ¥í•œ ìœ„ì¹˜ê°€ Check ë˜ì§€ì•ŠìŒ.
+		2. ìºë¦­í„° ë°”ë¡œ ì˜† êº¾ì´ëŠ” ì½”ë„ˆë¼ì„œ bStartPenetratingì´ true.
+		3. ì•„ë˜ì— Hopí•  ìˆ˜ìˆëŠ” ë²½ì´ ì¡´ì¬í•˜ì§€ì•Šì•„ì„œ Dropí•˜ë ¤ëŠ” ìƒíƒœ.
 	*/
 	if (WallHitTraces.Num() == 0)
 	{
@@ -3553,11 +3555,11 @@ void UParkourComponent::CheckHopWallTopHitResult()
 		WallHitResult = WallHitTraces[0];
 		for (int32 WallHitIndex = 1; WallHitIndex < WallHitTraces.Num(); WallHitIndex++)
 		{
-			// WallHitTraces[WallHitIndex]¿Í WallHitResultÀÇ CharacterLocation°úÀÇ Distance ºñ±³
+			// WallHitTraces[WallHitIndex]ì™€ WallHitResultì˜ CharacterLocationê³¼ì˜ Distance ë¹„êµ
 			float CurrentWallDistance = UKismetMathLibrary::Vector_Distance(WallHitTraces[WallHitIndex].ImpactPoint, CharacterLocation);
 			float PrevWallDistance = UKismetMathLibrary::Vector_Distance(WallHitResult.ImpactPoint, CharacterLocation);
 
-			if (CurrentWallDistance <= PrevWallDistance) // ÇöÀç Distance°¡ ´õ ÀÛ°Å³ª °°À¸¸é ±³Ã¼
+			if (CurrentWallDistance <= PrevWallDistance) // í˜„ì¬ Distanceê°€ ë” ì‘ê±°ë‚˜ ê°™ìœ¼ë©´ êµì²´
 				WallHitResult = WallHitTraces[WallHitIndex];
 		}
 
@@ -3573,7 +3575,7 @@ void UParkourComponent::CheckHopWallTopHitResult()
 				bool bTopHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), CheckWallTopStartPos, CheckWallTopEndPos, 5.f,
 					ParkourTraceType, false, TArray<AActor*>(), DDT_CheckHopWallTopLocation, CheckWallTopHitResult, true);
 
-				// HopÇÒ À§Ä¡ÀÇ TopÁ¤º¸ °»½Å
+				// Hopí•  ìœ„ì¹˜ì˜ Topì •ë³´ ê°±ì‹ 
 				if (bTopHit)
 					WallTopHitResult = CheckWallTopHitResult;
 			}
@@ -3586,7 +3588,7 @@ void UParkourComponent::FindCornerHopLocation()
 	if (bCanInCornerHop || bCanOutCornerHop)
 	{
 		WallRotation = CornerHopRotation;
-		WallHitTraces.Empty(); // ÃÊ±âÈ­
+		WallHitTraces.Empty(); // ì´ˆê¸°í™”
 		
 		FVector WallForwardVector = GetForwardVector(WallRotation);
 		FVector WallRightVector = GetRightVector(WallRotation);
@@ -3598,12 +3600,12 @@ void UParkourComponent::FindCornerHopLocation()
 		FVector CornerTraceStart;
 		FVector CornerTraceEnd;
 
-		// Left or Right ¹æÇâ¿¡ µû¸¥ Å½»ö ¹üÀ§ º¯È­
+		// Left or Right ë°©í–¥ì— ë”°ë¥¸ íƒìƒ‰ ë²”ìœ„ ë³€í™”
 		float HorizontalAxis = GetHorizontalAxis();
 		int32 StartIndex = HorizontalAxis < 0.f ? 0 : 4;
 		int32 EndIndex = HorizontalAxis < 0.f ? 2 : 6;
 
-		float CornerHopSelectWidth = (bCanOutCornerHop ? 50.f : 20.f) * HorizontalAxis; // Out Corner´Â »ó´ëÀûÀ¸·Î °Å¸®°¡ Âª±â ¶§¹®
+		float CornerHopSelectWidth = (bCanOutCornerHop ? 50.f : 20.f) * HorizontalAxis; // Out CornerëŠ” ìƒëŒ€ì ìœ¼ë¡œ ê±°ë¦¬ê°€ ì§§ê¸° ë•Œë¬¸
 		int32 CenterAdjust = CheckCornerHopWidth * 3;
 
 		for (; StartIndex <= EndIndex; StartIndex++)
@@ -3641,7 +3643,7 @@ void UParkourComponent::FindCornerHopLocation()
 	}
 }
 
-// CheckHopWallTopHitResult ÇÔ¼ö¿Í °ÅÀÇ À¯»ç
+// CheckHopWallTopHitResult í•¨ìˆ˜ì™€ ê±°ì˜ ìœ ì‚¬
 void UParkourComponent::CheckCornerHopWallTopHitResult()
 {
 	if (IsLedgeValid())
@@ -3650,11 +3652,11 @@ void UParkourComponent::CheckCornerHopWallTopHitResult()
 		WallHitResult = WallHitTraces[0];
 		for (int32 WallHitIndex = 1; WallHitIndex < WallHitTraces.Num(); WallHitIndex++)
 		{
-			// WallHitTraces[WallHitIndex]¿Í WallHitResultÀÇ CharacterLocation°úÀÇ Distance ºñ±³
+			// WallHitTraces[WallHitIndex]ì™€ WallHitResultì˜ CharacterLocationê³¼ì˜ Distance ë¹„êµ
 			float CurrentWallDistance = UKismetMathLibrary::Vector_Distance(WallHitTraces[WallHitIndex].ImpactPoint, CharacterLocation);
 			float PrevWallDistance = UKismetMathLibrary::Vector_Distance(WallHitResult.ImpactPoint, CharacterLocation);
 
-			if (CurrentWallDistance <= PrevWallDistance) // ÇöÀç Distance°¡ ´õ ÀÛ°Å³ª °°À¸¸é ±³Ã¼
+			if (CurrentWallDistance <= PrevWallDistance) // í˜„ì¬ Distanceê°€ ë” ì‘ê±°ë‚˜ ê°™ìœ¼ë©´ êµì²´
 				WallHitResult = WallHitTraces[WallHitIndex];
 			else
 				WallHitResult = WallHitResult;
@@ -3672,7 +3674,7 @@ void UParkourComponent::CheckCornerHopWallTopHitResult()
 				bool bTopHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), CheckWallTopStartPos, CheckWallTopEndPos, 5.f,
 					ParkourTraceType, false, TArray<AActor*>(), DDT_CheckHopWallTopLocation, CheckWallTopHitResult, true);
 
-				// HopÇÒ À§Ä¡ÀÇ TopÁ¤º¸ °»½Å
+				// Hopí•  ìœ„ì¹˜ì˜ Topì •ë³´ ê°±ì‹ 
 				if (bTopHit)
 					WallTopHitResult = CheckWallTopHitResult;
 			}
@@ -3682,8 +3684,8 @@ void UParkourComponent::CheckCornerHopWallTopHitResult()
 
 
 
-// Ã£Àº Hop À§Ä¡¿¡ Ä³¸¯ÅÍÀÇ CapsuleComponent°¡ ÀÌµ¿°¡´ÉÇÑÁö ÁöÁ¤ÇÑ Ä¸½¶ Å©±â¸¸Å­ °Ë»ç
-// ÀÌµ¿ °¡´ÉÇÑ À§Ä¡µéÀ» WallHitTraces¿¡ Emplace ÁøÇà
+// ì°¾ì€ Hop ìœ„ì¹˜ì— ìºë¦­í„°ì˜ CapsuleComponentê°€ ì´ë™ê°€ëŠ¥í•œì§€ ì§€ì •í•œ ìº¡ìŠ í¬ê¸°ë§Œí¼ ê²€ì‚¬
+// ì´ë™ ê°€ëŠ¥í•œ ìœ„ì¹˜ë“¤ì„ WallHitTracesì— Emplace ì§„í–‰
 void UParkourComponent::CheckHopCapsuleComponent()
 {
 	for (int32 HopIndex = 1; HopIndex < HopHitTraces.Num(); HopIndex++)
@@ -3692,7 +3694,7 @@ void UParkourComponent::CheckHopCapsuleComponent()
 		float CurrentDistance = GetHopResultDistance(HopHitTraces[HopIndex]);
 		float PrevDistance = GetHopResultDistance(HopHitTraces[HopIndex - 1]);
 
-		// Distance¸¦ ºñ±³¿¬»êÇÏ¿© 5.fÂ÷ÀÌ°¡ ¹ß»ıÇÏ¸é ±× À§Ä¡°¡ HopÀÌ °¡´ÉÇÑ ÃÖ¼Ò ºÎºĞÀÌ´Ù.
+		// Distanceë¥¼ ë¹„êµì—°ì‚°í•˜ì—¬ 5.fì°¨ì´ê°€ ë°œìƒí•˜ë©´ ê·¸ ìœ„ì¹˜ê°€ Hopì´ ê°€ëŠ¥í•œ ìµœì†Œ ë¶€ë¶„ì´ë‹¤.
 		if (CurrentDistance - PrevDistance > 5.f)
 		{
 			FHitResult CanHopHitResult = HopHitTraces[HopIndex - 1];
@@ -3725,7 +3727,7 @@ void UParkourComponent::CheckHopCapsuleComponent()
 
 
 
-// Vertical(¼öÁ÷)¹æÇâ Return
+// Vertical(ìˆ˜ì§)ë°©í–¥ Return
 float UParkourComponent::GetSelectVerticalHopDistance()
 {
 	return UPSFunctionLibrary::SelectDirectionFloat(
@@ -3741,7 +3743,7 @@ float UParkourComponent::GetSelectVerticalHopDistance()
 
 }
 
-// Horizontal(¼öÆò)¹æÇâ Return
+// Horizontal(ìˆ˜í‰)ë°©í–¥ Return
 float UParkourComponent::GetSelectHorizontalHopDisance()
 {
 
@@ -3754,7 +3756,7 @@ float UParkourComponent::GetSelectHorizontalHopDisance()
 		-ForwardAndBackWardLeftRight_Horizontal,
 		ForwardAndBackWardLeftRight_Horizontal,
 		-ForwardAndBackWardLeftRight_Horizontal,
-		ForwardAndBackWardLeftRight_Horizontal); // Left¹æÇâÀº ¿ª¼ö¸¦ º¸³»¾ßÇÑ´Ù. 
+		ForwardAndBackWardLeftRight_Horizontal); // Leftë°©í–¥ì€ ì—­ìˆ˜ë¥¼ ë³´ë‚´ì•¼í•œë‹¤. 
 }
 
 float UParkourComponent::GetHopResultDistance(const FHitResult& HopHitResult)
@@ -3803,8 +3805,8 @@ FGameplayTag UParkourComponent::GetClimbDesireRotation()
 
 	/*
 		UP : 10, Down : -10 // Left : -1, Right : 1
-		ÀÌ·¸°Ô ÃøÁ¤ÇÏ¿©¼­ °¢ °ªÀ» ´õÇÏ¿© 8¹æÇâÀ¸·Î swich¹® ±¸Çö
-		[±âÁ¸ if¹®¿¡¼­ else if¸¦ ÅëÇÑ ÇÏµå ÄÚµù½Ä¿¡¼­ °³¼± (ex. if(...) else if(...) * 7)]
+		ì´ë ‡ê²Œ ì¸¡ì •í•˜ì—¬ì„œ ê° ê°’ì„ ë”í•˜ì—¬ 8ë°©í–¥ìœ¼ë¡œ swichë¬¸ êµ¬í˜„
+		[ê¸°ì¡´ ifë¬¸ì—ì„œ else ifë¥¼ í†µí•œ í•˜ë“œ ì½”ë”©ì‹ì—ì„œ ê°œì„  (ex. if(...) else if(...) * 7)]
 	*/
 
 	int32 VericalState = 0;
