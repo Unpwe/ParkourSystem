@@ -178,8 +178,11 @@ bool UParkourAnimInstance::CallRightFootLocation(FVector TargetRightFootLocation
 
 void UParkourAnimInstance::SetClimbDirection(FGameplayTag NewClimbDirection)
 {
-	FName Tagname = UPSFunctionLibrary::GetGameplayTagName(NewClimbDirection);
+#ifdef DEBUG_PARKOURCOMPONENT
 	LOG(Error, TEXT("Set ClimbDirectionTag : %s"), *Tagname.ToString());
+#endif
+
+	FName Tagname = UPSFunctionLibrary::GetGameplayTagName(NewClimbDirection);
 	ClimbDirectionTag = NewClimbDirection;
 }
 

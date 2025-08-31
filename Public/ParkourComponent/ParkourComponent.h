@@ -193,7 +193,11 @@ public:
 
 	/* IK Hnad */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Hand", meta = (ClampMin = -50f, ClampMax = 20f))
-	float ClimbIKHandSpace = -20.f; // Climb상태에서 손 사이의 공간
+	float ClimbIKHandSpace = 20.f; // 첫 Climb Montage를 시도할 때의 손 사이 공간
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Hand", meta = (ClampMin = -20f, ClampMax = 20f))
+	float ClimbMovementIKHandSpace = -5.f; // Climb Movement상태에서 손 사이의 공간
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InitializeValus|IK|Hand")
 	float DirectionMovementSameHand = 0.f; // 이동방향과 손의 방향이 일치하는 경우 추가적으로 반대손보다 더 앞 쪽을 계산하기 위함.
 
@@ -571,9 +575,9 @@ public:
 	float ClimbStyleBracedZPosition = -100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Edit Location")
-	float ClimbStyleFreeHangXYPosition = -20.f;
+	float ClimbStyleFreeHangXYPosition = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Edit Location")
-	float ClimbStyleFreeHangZPosition = -107.f;
+	float ClimbStyleFreeHangZPosition = -103.f;
 
 
 
@@ -640,26 +644,26 @@ public:
 	float CheckCornerHopHeight = 8.f;
 
 	/* Vertical Hop Check Distance */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
-	float VerticalDistanceMultiplier = 25.f; // 아래 값들에 곱할 배율
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = 10.f, ClampMax = 50.f))
+	float VerticalDistanceMultiplier = 20.f; // 아래 값들에 곱할 배율
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = 0.f, ClampMax = 5.f))
 	float Forward_Vertical = 1.f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
-	float Backward_Vertical = -7.5f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
-	float LeftRight_Vertical = -2.5f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
-	float ForwardLeftRight_Vertical = -1.f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical")
-	float BackwardLeftRight_Vertical = -4.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = -50.f, ClampMax = -5.f))
+	float Backward_Vertical = -4.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = -10.f, ClampMax = 0.f))
+	float LeftRight_Vertical = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = -5.f, ClampMax = 5.f))
+	float ForwardLeftRight_Vertical = 2.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = -10.f, ClampMax = -1.f))
+	float BackwardLeftRight_Vertical = -10.f;
 
 
 	/* Horizontal Hop Check Distance */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal", meta = (ClampMin = 100.f, ClampMax = 180.f))
 	float HorizontalDistanceMultiplier = 140.f; // 아래 값들에 곱할 배율
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal", meta = (ClampMin = 1.f, ClampMax = 5.f))
 	float LeftRight_Horizontal = 1.f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Horizontal", meta = (ClampMin = 0.75f, ClampMax = 3.f))
 	float ForwardAndBackWardLeftRight_Horizontal = 0.75;
 
 

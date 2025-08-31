@@ -116,14 +116,15 @@ void UParkourComponent::PlayParkourCallable()
 	if (!OwnerCharacter || !CharacterMovement)
 		return;
 
-	if(bCanParkour && CapsuleComponent->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics)
+	if((bCanParkour && CapsuleComponent->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics)
+		|| UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb")))
 		ParkourAction();
 }
 
 
 void UParkourComponent::ParkourCancleCallable()
 {
-	if (UPSFunctionLibrary::CompGameplayTagName(ParkourActionTag, TEXT("Parkour.State.Climb")))
+	if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb")))
 	{
 		ParkourActionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Action.NoAction"));
 		bCanManuelClimb = true;
@@ -917,7 +918,7 @@ void UParkourComponent::PlayParkourMontage()
 	// 파쿠르 몽타주를 실행하면서 스테이트 변경
 	// ParkourInState -> 해당 몽타주의 상태
 	// ParkourInOut -> 몽타주가 끝나면 돼야할 상태 
-	// ex)In : Matle -> Out : NotBusy / in : ReachLedge -> Out :Climb
+	// ex)In : Mantle -> Out : NotBusy / in : ReachLedge -> Out :Climb
 	SetParkourState(ParkourVariables.ParkourInState);
 
 	bCanParkour = false; // 파쿠르 실행중
@@ -1433,9 +1434,9 @@ void UParkourComponent::MontageLeftHandIK()
 		{
 			/* WallRotation의 LedgeResult.ImpactPoint + Forward Vector 방향을 기준으로 
 			Left로 LeftIndex * -2만큼, -CheckClimbWidth 만큼 Trace*/ 
-			int32 LeftIndex = i * -2;
+			int32 LeftIndex = i * 2;
 
-			FVector WallRotation_Left = WallRightVector * (ClimbIKHandSpace - LeftIndex);  // Left는 음수, Right는 양수
+			FVector WallRotation_Left = WallRightVector * (-ClimbIKHandSpace - LeftIndex);  // Left는 음수, Right는 양수
 			FVector StartPos = LedgeResult.ImpactPoint + (WallForwardVector * -CheckClimbForward) + WallRotation_Left;
 			FVector EndPos = LedgeResult.ImpactPoint + (WallForwardVector * CheckClimbForward) + WallRotation_Left;
 			
@@ -1612,7 +1613,7 @@ void UParkourComponent::MontageRightHandIK()
 		{
 			int32 RightIndex = i * 2;
 		
-			FVector WallRotation_Right = WallRightVector * (-ClimbIKHandSpace - RightIndex);
+			FVector WallRotation_Right = WallRightVector * (ClimbIKHandSpace + RightIndex);
 			FVector StartPos = LedgeResult.ImpactPoint + (WallForwardVector * -CheckClimbForward) + WallRotation_Right;
 			FVector EndPos = LedgeResult.ImpactPoint + (WallForwardVector * CheckClimbForward) + WallRotation_Right;
 			
@@ -1789,14 +1790,14 @@ void UParkourComponent::ParkourLeftHandIK(FVector CharacterForwardVec, FVector C
 		
 		FVector LeftIKHandBasePos =
 			FVector(LeftIKHandSocketLoc.X, LeftIKHandSocketLoc.Y, LeftIKHandSocketLoc.Z - CharacterHeightDiff)
-			+ (CharacterRightVec * (-ClimbIKHandSpace + IndexCnt - SameDirection));
+			+ (CharacterRightVec * (-ClimbMovementIKHandSpace - IndexCnt - SameDirection));
 
 		int32 IndexHeightCnt = i * 10;
 		LeftIKHandBasePos -= FVector(0.f, 0.f, IndexHeightCnt); // Z값 까지 변경
 
 
-		FVector LeftIKHandStartPos = LeftIKHandBasePos + (CharacterForwardVec * (-10 + CustomClimbXYPostion));
-		FVector LeftIKHandEndPos = LeftIKHandBasePos + (CharacterForwardVec * (30 + -CustomClimbXYPostion));
+		FVector LeftIKHandStartPos = LeftIKHandBasePos + (CharacterForwardVec * (-10 - FMath::Abs(CustomClimbXYPostion)));
+		FVector LeftIKHandEndPos = LeftIKHandBasePos + (CharacterForwardVec * (30 + FMath::Abs(CustomClimbXYPostion)));
 
 		// 벽 체크
 		FHitResult Ht_LeftHandWall;
@@ -1886,14 +1887,14 @@ void UParkourComponent::ParkourRightHandIK(FVector CharacterForwardVec, FVector 
 
 		FVector RightIKHandBasePos =
 			FVector(RightIKHandSocketLoc.X, RightIKHandSocketLoc.Y, RightIKHandSocketLoc.Z - CharacterHeightDiff)
-			+ (CharacterRightVec * (-1 * (-ClimbIKHandSpace + IndexCnt - SameDirection))); // Right는 역수
+			+ (CharacterRightVec * (ClimbMovementIKHandSpace + IndexCnt - SameDirection));
 
 		
 		int32 IndexHeightCnt = i * 10;
 		RightIKHandBasePos -= FVector(0.f, 0.f, IndexHeightCnt); // Z값 까지 변경
 		
-		FVector RightIKHandStartPos = RightIKHandBasePos + (CharacterForwardVec * (-10 + CustomClimbXYPostion));
-		FVector RightIKHandEndPos = RightIKHandBasePos + (CharacterForwardVec * (30 + -CustomClimbXYPostion));
+		FVector RightIKHandStartPos = RightIKHandBasePos + (CharacterForwardVec * (-10 - FMath::Abs(CustomClimbXYPostion)));
+		FVector RightIKHandEndPos = RightIKHandBasePos + (CharacterForwardVec * (30 + FMath::Abs(CustomClimbXYPostion)));
 
 		// 벽 체크
 		FHitResult Ht_RightHandWall;
@@ -2532,8 +2533,8 @@ float UParkourComponent::GetClimbMoveSpeed()
 
 	if (bFindName)
 	{
-		float BracedSpeed = FMath::Clamp(OutputValue, 1.f, ClimbSpeedMaxValue) * ClimbSpeedBraced;
-		float FreeHangSpeed = FMath::Clamp(OutputValue, 1.f, ClimbSpeedMaxValue) * ClimbSpeedFreeHang;
+		float BracedSpeed = FMath::Clamp(OutputValue, 0.f, ClimbSpeedMaxValue) * ClimbSpeedBraced;
+		float FreeHangSpeed = FMath::Clamp(OutputValue, 0.f, ClimbSpeedMaxValue) * ClimbSpeedFreeHang;
 
 		return UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, BracedSpeed, FreeHangSpeed);
 	}
@@ -2766,11 +2767,11 @@ bool UParkourComponent::CheckOutCorner()
 
 	for (int32 i = 0; i <= 5; i++)
 	{
-		LocalOutCornerIndex = i;
+		LocalOutCornerIndex = i * -10;
 		float CheckHorizontalWidth = HoriozontalAxis * 35.f;
-		FVector StartPos = FVector(0.f, 0.f, LocalOutCornerIndex * -10) + ArrowWorldLocation 
-			+ (CheckHorizontalWidth * ArrowRightVector);
-		FVector EndPos = StartPos + (ArrowForwardVector * 100.f);
+		FVector StartPos = FVector(0.f, 0.f, LocalOutCornerIndex) + ArrowWorldLocation 
+			+ (CheckHorizontalWidth * ArrowRightVector) + (ArrowForwardVector * -20.f);
+		FVector EndPos = StartPos + (ArrowForwardVector * 60.f);
 
 		FHitResult CornerOutHitResult;
 		UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 5.f, ParkourTraceType, false,
@@ -2837,7 +2838,7 @@ void UParkourComponent::OutCornerMovement()
 					FRotator NormalizeRotator = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(OutCornerCheckHitResult.ImpactNormal);
 					FVector CornerForwardVector = GetForwardVector(NormalizeRotator);
 
-					FVector BaseXYVector = CornerForwardVector * UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition)
+					FVector BaseXYVector = CornerForwardVector * (UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition) - 10.f)
 						+ OutCornerCheckTopHitResult.ImpactPoint;
 
 					FVector CornerMoveTargetReletiveLocation =
@@ -3015,7 +3016,7 @@ void UParkourComponent::CheckInCornerSideTop(const FHitResult& InCornerSideCheck
 					WallRotation = NormalizeRotator;
 
 					FVector CornerMove_XY = InCornerSideCheckHitResult.ImpactPoint
-						+ ForwardNormalVector * UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition);
+						+ ForwardNormalVector * (UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedXYPosition, ClimbStyleFreeHangXYPosition) - 10.f);
 
 					float CornerMove_Z = TopCheckHitResult.ImpactPoint.Z
 						+ UPSFunctionLibrary::SelectClimbStyleFloat(ClimbStyleTag, ClimbStyleBracedZPosition, ClimbStyleFreeHangZPosition)

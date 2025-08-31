@@ -121,7 +121,7 @@ float UPSFunctionLibrary::SelectDirectionFloat(FGameplayTag DirectionTag, float 
 		return ForwardRight;
 		break;
 	case BACKWARD_RIGHT:
-		return ForwardRight;
+		return BackwardRight;
 		break;
 	case BACKWARD_LEFT:
 		return BackwardLeft;
