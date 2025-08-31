@@ -2,7 +2,7 @@
 
 #pragma once
 
-#define DEBUG_PARKOURCOMPONENT
+//#define DEBUG_PARKOURCOMPONENT
 //#define DEBUG_TICK
 //#define DEBUG_MOVEMENT
 //#define DEBUG_IK
@@ -470,7 +470,7 @@ public:
 		얼만큼의 폭으로 검사할 것인지.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ClimbIK|Width")
-	float CheckClimbForward = 20.f;
+	float CheckClimbForward = 5.f;
 
 	/* 캐릭터의 높이, 캐릭터의 손 높이를 수동적으로 조절 */
 	// 이 값이 올라가면 수치 만큼 캐릭터가 파쿠르할 때 위로 올라감
@@ -570,12 +570,12 @@ public:
 	* 알맞은 자리에 알맞게 애니메이션 상태를 위치 시키기 위해 수동적으로 변경하기위한 변수
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Edit Location")
-	float ClimbStyleBracedXYPosition = -40.f;
+	float ClimbStyleBracedXYPosition = -37.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Edit Location")
-	float ClimbStyleBracedZPosition = -100.f;
+	float ClimbStyleBracedZPosition = -97.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Edit Location")
-	float ClimbStyleFreeHangXYPosition = 0.f;
+	float ClimbStyleFreeHangXYPosition = -5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|ClimbMovement|Edit Location")
 	float ClimbStyleFreeHangZPosition = -103.f;
 
@@ -608,9 +608,9 @@ public:
 		해당 값 만큼 애니메이션의 보간시간을 주어 부드럽게 움직인다.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|CornerMovement|OverTime")
-	float CornerMoveComponentToOverTime_Braced = 0.3f;
+	float CornerMoveComponentToOverTime_Braced = 0.6f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|CornerMovement|OverTime")
-	float CornerMoveComponentToOverTime_FreeHang = 0.3f;
+	float CornerMoveComponentToOverTime_FreeHang = 0.6f;
 
 
 	/*--------------
@@ -647,9 +647,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = 10.f, ClampMax = 50.f))
 	float VerticalDistanceMultiplier = 20.f; // 아래 값들에 곱할 배율
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = 0.f, ClampMax = 5.f))
-	float Forward_Vertical = 1.f;
+	float Forward_Vertical = 2.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = -50.f, ClampMax = -5.f))
-	float Backward_Vertical = -4.f;
+	float Backward_Vertical = -10.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = -10.f, ClampMax = 0.f))
 	float LeftRight_Vertical = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hop|FindHopCheckDistnace|Vertical", meta = (ClampMin = -5.f, ClampMax = 5.f))

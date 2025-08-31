@@ -1429,14 +1429,15 @@ void UParkourComponent::MontageLeftHandIK()
 		/* 최종적으로 AnimInstance->SetLeftHandLedgeLocation / Rotation을 하는 위치 */
 		FVector TargetLeftHandLedgeLocation;
 		FRotator TagetLeftHandLedgeRotation;
+		int32 IKEndIndex = FMath::Abs(ClimbIKHandSpace) / 4;
 
 		for (int32 i = 0; i <= 4; i++)
 		{
 			/* WallRotation의 LedgeResult.ImpactPoint + Forward Vector 방향을 기준으로 
 			Left로 LeftIndex * -2만큼, -CheckClimbWidth 만큼 Trace*/ 
-			int32 LeftIndex = i * 2;
+			int32 LeftIndex = i * IKEndIndex;
 
-			FVector WallRotation_Left = WallRightVector * (-ClimbIKHandSpace - LeftIndex);  // Left는 음수, Right는 양수
+			FVector WallRotation_Left = WallRightVector * (-ClimbIKHandSpace + LeftIndex);  // Left는 음수, Right는 양수
 			FVector StartPos = LedgeResult.ImpactPoint + (WallForwardVector * -CheckClimbForward) + WallRotation_Left;
 			FVector EndPos = LedgeResult.ImpactPoint + (WallForwardVector * CheckClimbForward) + WallRotation_Left;
 			
@@ -1608,12 +1609,13 @@ void UParkourComponent::MontageRightHandIK()
 		/* 최종적으로 AnimInstance->SetLeftHandLedgeLocation / Rotation을 하는 위치 */
 		FVector TargetRightHandLedgeLocation;
 		FRotator TagetRightHandLedgeRotation;
+		int32 IKEndIndex = FMath::Abs(ClimbIKHandSpace) / 4;
 
 		for (int32 i = 0; i <= 4; i++)
 		{
-			int32 RightIndex = i * 2;
+			int32 RightIndex = i * IKEndIndex;
 		
-			FVector WallRotation_Right = WallRightVector * (ClimbIKHandSpace + RightIndex);
+			FVector WallRotation_Right = WallRightVector * (ClimbIKHandSpace - RightIndex);
 			FVector StartPos = LedgeResult.ImpactPoint + (WallForwardVector * -CheckClimbForward) + WallRotation_Right;
 			FVector EndPos = LedgeResult.ImpactPoint + (WallForwardVector * CheckClimbForward) + WallRotation_Right;
 			
@@ -3529,6 +3531,10 @@ void UParkourComponent::FindHopLocation()
 
 void UParkourComponent::CheckHopWallTopHitResult()
 {
+#ifndef DEBUG_PARKOURCOMPONENT
+	LOG(Warning, TEXT("CheckHopWallTopHitResult"));
+#endif
+
 	/*
 		WallHitTraces에 아무것도 없다는 뜻은
 		1. 양 옆으로 Hop이 가능한 위치가 Check 되지않음.
@@ -3654,10 +3660,10 @@ void UParkourComponent::CheckCornerHopWallTopHitResult()
 		for (int32 WallHitIndex = 1; WallHitIndex < WallHitTraces.Num(); WallHitIndex++)
 		{
 			// WallHitTraces[WallHitIndex]와 WallHitResult의 CharacterLocation과의 Distance 비교
-			float CurrentWallDistance = UKismetMathLibrary::Vector_Distance(WallHitTraces[WallHitIndex].ImpactPoint, CharacterLocation);
-			float PrevWallDistance = UKismetMathLibrary::Vector_Distance(WallHitResult.ImpactPoint, CharacterLocation);
+			float NextWallDistance = UKismetMathLibrary::Vector_Distance(WallHitTraces[WallHitIndex].ImpactPoint, CharacterLocation);
+			float CurrentWallDistance = UKismetMathLibrary::Vector_Distance(WallHitResult.ImpactPoint, CharacterLocation);
 
-			if (CurrentWallDistance <= PrevWallDistance) // 현재 Distance가 더 작거나 같으면 교체
+			if (NextWallDistance <= CurrentWallDistance) // 현재 Distance가 더 작거나 같으면 교체
 				WallHitResult = WallHitTraces[WallHitIndex];
 			else
 				WallHitResult = WallHitResult;
@@ -3668,8 +3674,8 @@ void UParkourComponent::CheckCornerHopWallTopHitResult()
 			if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb")))
 			{
 				WallRotation = UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(WallHitResult.ImpactNormal);
-				FVector CheckWallTopStartPos = WallHitResult.ImpactPoint + FVector(0.f, 0.f, 3.f);
-				FVector CheckWallTopEndPos = CheckWallTopStartPos - FVector(0.f, 0.f, 3.f);
+				FVector CheckWallTopStartPos = WallHitResult.ImpactPoint + FVector(0.f, 0.f, 5.f);
+				FVector CheckWallTopEndPos = CheckWallTopStartPos - FVector(0.f, 0.f, 5.f);
 
 				FHitResult CheckWallTopHitResult;
 				bool bTopHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), CheckWallTopStartPos, CheckWallTopEndPos, 5.f,
