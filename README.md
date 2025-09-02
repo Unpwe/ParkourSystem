@@ -12,6 +12,6 @@
 
 
 ## 1. 셋업
-![initialize](img width="797" height="598" alt="1" src="https://github.com/user-attachments/assets/57557e44-614e-48e2-b7f0-2655f9aa78f2")
+![initialize]<img width="797" height="598" alt="1" src="https://github.com/user-attachments/assets/d49c31f5-ab1c-40e2-a8b5-7942f69bc281" />
 
 
