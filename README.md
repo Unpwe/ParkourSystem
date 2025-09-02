@@ -12,6 +12,9 @@
 
 
 ## 1. 셋업
-![initialize]<img width="797" height="598" alt="1" src="https://github.com/user-attachments/assets/d49c31f5-ab1c-40e2-a8b5-7942f69bc281" />
+|<img width="797" height="598" alt="1" src="https://github.com/user-attachments/assets/d49c31f5-ab1c-40e2-a8b5-7942f69bc281" />|
+|:--:|
+| gg |
+
 
 
