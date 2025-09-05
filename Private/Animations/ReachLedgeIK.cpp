@@ -25,7 +25,7 @@ void UReachLedgeIK::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 		{
 			if (UPSFunctionLibrary::CompGameplayTagName(WhichHandTag, TEXT("Parkour.Direction.Left")))
 				ParkourComponent->CallMontageLeftIK(true);
-			else
+			else if(UPSFunctionLibrary::CompGameplayTagName(WhichHandTag, TEXT("Parkour.Direction.Right")))
 				ParkourComponent->CallMontageRightIK(true);
 		}
 	}

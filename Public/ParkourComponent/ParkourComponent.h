@@ -324,6 +324,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrawDebugTrace|ClimbIK")
 	TEnumAsByte<EDrawDebugTrace::Type> DDT_RightClimbFootIK = EDrawDebugTrace::None;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrawDebugTrace|ClimbIK")
+	TEnumAsByte<EDrawDebugTrace::Type> DDT_AdditiveHandClimbHandIK = EDrawDebugTrace::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DrawDebugTrace|ClimbIK")
+	TEnumAsByte<EDrawDebugTrace::Type> DDT_AdditiveFootClimbFootIK = EDrawDebugTrace::None;
+
 
 	/*-------------------------
 		DDT | Climb Movement
@@ -667,7 +673,6 @@ public:
 	float ForwardAndBackWardLeftRight_Horizontal = 0.75;
 
 
-
 /*---------------Public End------------------*/
 
 private:
@@ -803,14 +808,6 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "PreviousState_Setting", meta = (AllowPrivateAccess = "true"))
 	FName RightIKFootCurveName = "RightFootIK";
 
-	/*------------------
-			Test
-	--------------------*/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location" , meta = (AllowPrivateAccess = "true"))
-	FVector LastLeftHandIKTargetLocation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location", meta = (AllowPrivateAccess = "true"))
-	FVector LastRightHandIKTargetLocation;
 
 
 	/*-------------------------
@@ -902,6 +899,31 @@ private:
 	FGameplayTag ClimbDirectionTag;
 
 
+/*-------------------------------------
+		Last IK Location
+--------------------------------------*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location", meta = (AllowPrivateAccess = "true"))
+	FVector LastLeftHandIKTargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location", meta = (AllowPrivateAccess = "true"))
+	FVector LastRightHandIKTargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location", meta = (AllowPrivateAccess = "true"))
+	FVector LastLeftFootIKTargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location", meta = (AllowPrivateAccess = "true"))
+	FVector LastRightFootIKTargetLocation;
+
+/*-------------------------------------
+		Last IK Rotation
+--------------------------------------*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location", meta = (AllowPrivateAccess = "true"))
+	FRotator LastLeftHandIKTargetRotation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Hand IK Location", meta = (AllowPrivateAccess = "true"))
+	FRotator LastRightHandIKTargetRotation;
+
+
 
 /*------------- Private End --------------*/
 
@@ -942,9 +964,20 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_SetParkourStateWidget();
 
+/*-----------------------------------
+		Callable Montage IK
+-------------------------------------*/
 
 	void CallMontageLeftIK(bool bIKStart);
 	void CallMontageRightIK(bool bIKStart);
+
+/*-----------------------------------------------------------
+		Montage Last Hand IK Additive Location
+-------------------------------------------------------------*/
+	void CallableAdditiveHandIKLocation(bool bLeft, FVector AddtiveLocation);
+	void CallableAdditiveHandIKRotation(bool bLeft, FRotator AddtiveRotation);
+	void CallableAdditiveFootIKLocation(bool bLeft, FVector AddtiveLocation);
+
 
 private:
 	/*----------------------
@@ -1045,6 +1078,13 @@ private:
 	void MontageRightIK(bool bLastClimbLocation);
 	void MontageRightHandIK();
 	void MontageRightFootIK();
+
+/*-----------------------------------------------------------
+		Montage Last Hand IK Additive Location
+-------------------------------------------------------------*/
+	void AdditiveHandIKLocation(bool bLeft, FVector AddtiveLocation);
+	void AdditiveHandIKRotation(bool bLeft, FRotator AddtiveRotation);
+	void AdditiveFootIKLocation(bool bLeft, FVector AddtiveLocation);
 
 	/*------------------------------
 		Climb Movemnet IK
@@ -1169,5 +1209,8 @@ private:
 	FVector GetUpVector(FRotator Rotator);
 	FVector GetCharacterForwardVector();
 	FVector GetCharacterRightVector();
+
+
+
 
 };

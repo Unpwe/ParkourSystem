@@ -157,7 +157,6 @@ void UParkourComponent::ResetMovementCallable()
 }
 
 
-
 void UParkourComponent::CallMontageLeftIK(bool bIKStart)
 {
 	MontageLeftIK(bIKStart);
@@ -167,6 +166,23 @@ void UParkourComponent::CallMontageRightIK(bool bIKStart)
 {
 	MontageRightIK(bIKStart);
 }
+
+
+void UParkourComponent::CallableAdditiveHandIKLocation(bool bLeft, FVector AddtiveLocation)
+{
+	AdditiveHandIKLocation(bLeft, AddtiveLocation);
+}
+
+void UParkourComponent::CallableAdditiveHandIKRotation(bool bLeft, FRotator AddtiveRotation)
+{
+	AdditiveHandIKRotation(bLeft, AddtiveRotation);
+}
+
+void UParkourComponent::CallableAdditiveFootIKLocation(bool bLeft, FVector AddtiveLocation)
+{
+	AdditiveFootIKLocation(bLeft, AddtiveLocation);
+}
+
 
 
 
@@ -1495,8 +1511,8 @@ void UParkourComponent::MontageLeftHandIK()
 
 						TagetLeftHandLedgeRotation = FRotator(LeftClimbHitResultNormalRotator + Additive_LeftClimbIKHandRotation);
 
-
 						LastLeftHandIKTargetLocation = TargetLeftHandLedgeLocation;
+						LastLeftHandIKTargetRotation = TagetLeftHandLedgeRotation;
 
 						AnimInstance->SetLeftHandLedgeLocation(TargetLeftHandLedgeLocation);
 						AnimInstance->SetLeftHandLedgeRotation(TagetLeftHandLedgeRotation);
@@ -1567,6 +1583,7 @@ void UParkourComponent::MontageLeftFootIK()
 						FVector SecondClimbFootHitResult_ForwardVector = GetForwardVector(UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(SecondClimbFootHitResult.ImpactNormal));
 						FVector LeftFootLocation = SecondClimbFootHitResult.ImpactPoint + (SecondClimbFootHitResult_ForwardVector * -BracedFootAddThickness_Left);
 
+						LastLeftFootIKTargetLocation = LeftFootLocation;
 						AnimInstance->SetLeftFootLocation(LeftFootLocation);
 						break;
 					}
@@ -1663,9 +1680,8 @@ void UParkourComponent::MontageRightHandIK()
 
 						TagetRightHandLedgeRotation = FRotator(RightClimbHitResultNormalRotator + Additive_RightClimbIKHandRotation);
 
-						LOG(Error, TEXT("TargetRightHandLedgeLocation %f, %f, %f"), TargetRightHandLedgeLocation.X, TargetRightHandLedgeLocation.Y, TargetRightHandLedgeLocation.Z);
-
 						LastRightHandIKTargetLocation = TargetRightHandLedgeLocation;
+						LastRightHandIKTargetRotation = TagetRightHandLedgeRotation;
 
 						AnimInstance->SetRightHandLedgeLocation(TargetRightHandLedgeLocation);
 						AnimInstance->SetRightHandLedgeRotation(TagetRightHandLedgeRotation);
@@ -1733,6 +1749,7 @@ void UParkourComponent::MontageRightFootIK()
 							FVector SecondClimbFootHitResult_ForwardVector = GetForwardVector(UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(SecondClimbFootHitResult.ImpactNormal));
 							FVector RightFootLocation = SecondClimbFootHitResult.ImpactPoint + (SecondClimbFootHitResult_ForwardVector * -BracedFootAddThickness_Right);
 							
+							LastRightFootIKTargetLocation = RightFootLocation;
 							AnimInstance->SetRightFootLocation(RightFootLocation);
 							break;
 						}
@@ -1744,9 +1761,104 @@ void UParkourComponent::MontageRightFootIK()
 }
 
 
-/*----------------------
+/*-----------------------------------------------------------
+		Montage Last Hand IK Additive Location
+-------------------------------------------------------------*/
+void UParkourComponent::AdditiveHandIKLocation(bool bLeft, FVector AddtiveLocation)
+{
+	FVector ForwardVector = GetForwardVector(WallRotation) * AddtiveLocation.X;
+	FVector RightVector = GetRightVector(WallRotation) * AddtiveLocation.Y;
+	FVector UpVector = GetUpVector(WallRotation) * AddtiveLocation.Z;
+	FVector AddLocation = ForwardVector + RightVector + UpVector;
+
+
+	if (bLeft)
+	{
+		FVector StartPos = LastLeftHandIKTargetLocation + AddLocation + FVector(0.f, 0.f, 30.f);
+		FVector EndPos = LastLeftHandIKTargetLocation + AddLocation + FVector(0.f, 0.f, -10.f);
+
+		FHitResult AdditiveLeftHandIKLocationResult;
+		bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 2.5f, ParkourTraceType, false, TArray<AActor*>(), DDT_AdditiveHandClimbHandIK, AdditiveLeftHandIKLocationResult, true);
+		
+		if(AdditiveLeftHandIKLocationResult.bBlockingHit)
+			AnimInstance->SetLeftHandLedgeLocation(AdditiveLeftHandIKLocationResult.ImpactPoint);
+		else if (AdditiveLeftHandIKLocationResult.bStartPenetrating)
+		{
+			// 겹칠 경우 벽이 존재
+		}
+	}
+	else
+	{
+		FVector StartPos = LastRightHandIKTargetLocation + AddLocation + FVector(0.f, 0.f, 30.f);
+		FVector EndPos = LastRightHandIKTargetLocation + AddLocation + FVector(0.f, 0.f, -10.f);
+
+		FHitResult AdditiveRightHandIKLocationResult;
+		bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 2.5f, ParkourTraceType, false, TArray<AActor*>(), DDT_AdditiveHandClimbHandIK, AdditiveRightHandIKLocationResult, true);
+		
+		if(AdditiveRightHandIKLocationResult.bBlockingHit)
+			AnimInstance->SetRightHandLedgeLocation(AdditiveRightHandIKLocationResult.ImpactPoint);
+		else if (AdditiveRightHandIKLocationResult.bStartPenetrating)
+		{
+			// 겹칠 경우 벽이 존재
+		}
+	}
+
+}
+
+void UParkourComponent::AdditiveHandIKRotation(bool bLeft, FRotator AddtiveRotation)
+{
+	if (bLeft)
+		AnimInstance->SetLeftHandLedgeRotation(LastLeftHandIKTargetRotation + AddtiveRotation);
+	else
+		AnimInstance->SetRightHandLedgeRotation(LastRightHandIKTargetRotation + AddtiveRotation);
+}
+
+void UParkourComponent::AdditiveFootIKLocation(bool bLeft, FVector AddtiveLocation)
+{
+	FVector ForwardVector = GetForwardVector(WallRotation) * AddtiveLocation.X;
+	FVector RightVector = GetRightVector(WallRotation) * AddtiveLocation.Y;
+	FVector UpVector = GetUpVector(WallRotation) * AddtiveLocation.Z;
+	FVector AddLocation = ForwardVector + RightVector + UpVector;
+
+	if (bLeft)
+	{
+		FVector StartPos = LastLeftFootIKTargetLocation + AddLocation + (ForwardVector * -30.f);
+		FVector EndPos = LastLeftFootIKTargetLocation + AddLocation + (ForwardVector * 30.f);
+
+		FHitResult AdditiveLeftFootIKLocationResult;
+		bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 15.f, ParkourTraceType, false, TArray<AActor*>(), DDT_AdditiveFootClimbFootIK, AdditiveLeftFootIKLocationResult, true);
+
+		if (AdditiveLeftFootIKLocationResult.bBlockingHit)
+			AnimInstance->SetLeftFootLocation(AdditiveLeftFootIKLocationResult.ImpactPoint);
+		else if (AdditiveLeftFootIKLocationResult.bStartPenetrating)
+		{
+			// 겹칠 경우 벽이 존재
+		}
+	}
+	else
+	{
+		FVector StartPos = LastRightFootIKTargetLocation + AddLocation + (ForwardVector * -30.f);
+		FVector EndPos = LastRightFootIKTargetLocation + AddLocation + (ForwardVector * 30.f);
+
+		FHitResult AdditiveRightFootIKLocationResult;
+		bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 15.f, ParkourTraceType, false, TArray<AActor*>(), DDT_AdditiveFootClimbFootIK, AdditiveRightFootIKLocationResult, true);
+
+		if (AdditiveRightFootIKLocationResult.bBlockingHit)
+			AnimInstance->SetRightFootLocation(AdditiveRightFootIKLocationResult.ImpactPoint);
+		else if (AdditiveRightFootIKLocationResult.bStartPenetrating)
+		{
+			// 겹칠 경우 벽이 존재
+		}
+	}
+}
+
+
+
+
+
+/*---------------------------
 	Climb Movemnet IK
------------------------*/
+----------------------------*/
 void UParkourComponent::ClimbMovementIK()
 {
 	if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb")))
