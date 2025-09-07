@@ -52,6 +52,7 @@
 ![Parkour Callable](https://github.com/user-attachments/assets/d4ef2115-85ec-49ce-8585-2b8f49370355)
 
 파쿠르를 실행하는 실질적인 함수. <br />
+
 **[Play Parkour Callable]** 함수를 실행하면 내부에서 캐릭터 앞의 벽의 높이, 깊이, 너비를 계산하여 상황에 맞는 파쿠르를 진행한다.
 
 > **[Play Parkour Callable]** : 파쿠르 실행 함수 실행 <br />
@@ -74,8 +75,10 @@
 ## 3. Parkour Data Asset
 ![ParkourDataAsset](https://github.com/user-attachments/assets/6425bb58-02fa-45bc-b917-e18a1a2c2ee5)
 
-내부 로직으로 어떤 파쿠르 행동을 할 지 정했다면, 파쿠르를 실제 동작하기 위한 정보들을 담고 있는 DataAsset. <br />
-파쿠르를 실행할 때 **어떤 애니메이션 몽타주를 사용할 것인지, 어떤 상태로 진입하여 어떤 상태로 남을 것인지**, 애니메이션 몽타주의 실행 위치를 **Top, Depth, Vault, Mantle**로 상세하게 나눠 값을 지정할 수 있다. <br />
+내부 로직으로 어떤 파쿠르 행동을 할 지 정했다면, 파쿠르를 실제 동작하기 위한 정보들을 담고 있는 **DataAsset.** <br />
+
+파쿠르를 실행할 때 **어떤 애니메이션 몽타주를 사용할 것인지, 어떤 상태로 진입하여 어떤 상태로 남을 것인지**, 애니메이션 몽타주의 실행 위치를 <br />
+**Top, Depth, Vault, Mantle**로 상세하게 나눠 값을 지정할 수 있다. <br />
 
 > * Idle / Walk / Sprint 상태별로 작성할 수 있다. <br />
 > * 해당 벽의 위치를 기준으로 해당 입력한 값을 더하는 형식으로 위치를 이동시킬 수 있다. <br />
@@ -90,67 +93,76 @@
 ## 4. 파쿠르 액션
 
 ### ❖ Vault
-![Vault](https://github.com/user-attachments/assets/c8ac377e-88b3-4a38-bbc5-8101e87982c1)
-
+---
+![Vault](https://github.com/user-attachments/assets/c8ac377e-88b3-4a38-bbc5-8101e87982c1) <br />
 **[Vault]** : 벽을 넘는 액션
 
-![ThinVault](https://github.com/user-attachments/assets/01a6bb59-cd0c-4b71-8088-55b8cbcb38de)
+<br>
 
+![ThinVault](https://github.com/user-attachments/assets/01a6bb59-cd0c-4b71-8088-55b8cbcb38de) <br />
 **[ThinVault]** : 얇은 벽을 넘는 액션
 
-![HighVault](https://github.com/user-attachments/assets/badfaf36-c9b6-4b37-97b2-d6a73c85ce43)
+<br>
 
+![HighVault](https://github.com/user-attachments/assets/badfaf36-c9b6-4b37-97b2-d6a73c85ce43) <br />
 **[HightVault]** : 높은 벽을 넘는 액션
 
-> ![LowSpeedMantle](https://github.com/user-attachments/assets/b0db8876-db17-4938-9554-153728b62b8c)
+<br>
 
-> **Vault**를 시도할 때 속도가 부족하거나 Idle 상태일 때에는 Mantle이 실행된다.
+> ![LowSpeedMantle](https://github.com/user-attachments/assets/b0db8876-db17-4938-9554-153728b62b8c) <br />
+> **Vault**를 시도할 때 속도가 부족하거나 Idle 상태일 때에는 **Mantle**이 실행된다.
 
+<br>
 
 ### ❖ Mantle
-![Mantle](https://github.com/user-attachments/assets/7264559c-42a8-4d7f-99a7-723194af69e9)
-
+---
+![Mantle](https://github.com/user-attachments/assets/7264559c-42a8-4d7f-99a7-723194af69e9) <br />
 **[Mantle]** : 넘을 수는 없는 벽을 올라가는 액션
 
-![LowMantle](https://github.com/user-attachments/assets/ef67816a-e8db-4c67-8e69-74d5adcac387)
+<br>
 
+![LowMantle](https://github.com/user-attachments/assets/ef67816a-e8db-4c67-8e69-74d5adcac387) <br />
 **[Mantle]** : 넘을 수는 없는 낮은 벽을 올라가는 액션
 
+<br>
 
 ### ❖ Climb
-![BracedClimb](https://github.com/user-attachments/assets/a23ba843-ff0e-44fe-95c0-b199209681a9)
-
+---
+![BracedClimb](https://github.com/user-attachments/assets/a23ba843-ff0e-44fe-95c0-b199209681a9) <br />
 **[Braced Climb]** : 발을 디딜 수 있는 벽에 매달리는 액션
 
-![BracedClimbMovement](https://github.com/user-attachments/assets/75e99c70-5631-4e26-90c4-78027ea18094)
+<br>
 
+![BracedClimbMovement](https://github.com/user-attachments/assets/75e99c70-5631-4e26-90c4-78027ea18094) <br />
 **[Braced Climb Movement]** : 발을 디딜 수 있는 벽에서 양 옆으로 이동 하는 액션
 
-![FreeHang](https://github.com/user-attachments/assets/25e433e1-43fb-4882-8827-93ac99d0b633)
+<br>
 
+![FreeHang](https://github.com/user-attachments/assets/25e433e1-43fb-4882-8827-93ac99d0b633) <br />
 **[FreeHang Climb]** : 발을 디딜 수 없는 벽에 매달리는 액션
 
-![FreeHangMovement](https://github.com/user-attachments/assets/05f23475-9865-4cf0-beca-1e5f4b82083a)
+<br>
 
+![FreeHangMovement](https://github.com/user-attachments/assets/05f23475-9865-4cf0-beca-1e5f4b82083a) <br />
 **[FreeHang Climb Movement]** : 발을 디딜 수 없는 벽에서 양 옆으로 이동 하는 액션
 
-![ClimbUp](https://github.com/user-attachments/assets/b8ab5420-10ba-4e37-902d-42831c725e32)
+<br>
 
+![ClimbUp](https://github.com/user-attachments/assets/b8ab5420-10ba-4e37-902d-42831c725e32) <br />
 **[Climb Up]** : 매달린 벽에서 위에 올라갈 수 있는 공간이 있는 경우 올라가는 액션
 
+<br>
 
 ### ❖ Hop
+---
 ![Hop](https://github.com/user-attachments/assets/c6eb5005-3284-474b-92b8-a406b4f31a2b)
-![NotCornerHop](https://github.com/user-attachments/assets/17371a23-c5ad-4635-a7ba-437ef66dda04)
-
+![NotCornerHop](https://github.com/user-attachments/assets/17371a23-c5ad-4635-a7ba-437ef66dda04) <br />
 **[Hop]** : 매달린 상태에서 다른 벽으로 이동하는 액션
 
+<br>
 
-![CornerHop](https://github.com/user-attachments/assets/e5968db0-d3fc-42b2-a448-42c31519ad86)
-
+![CornerHop](https://github.com/user-attachments/assets/e5968db0-d3fc-42b2-a448-42c31519ad86) <br />
 **[Corner Hop]** : 매달린 벽에서 수직인 벽이 있는경우 이동하는 액션
-
-
 
 <br>
 
