@@ -3288,7 +3288,7 @@ void UParkourComponent::CheckInCornerHop()
 	}
 	else
 	{
-		FVector ArrowWorldLocation = ArrowActor->GetArrowWorldLocation();
+		FVector ArrowWorldLocation = ArrowActor->GetArrowWorldLocation() - FVector(0.f, 0.f, -20.f);
 		FRotator ArrowWorldRotation = ArrowActor->GetArrowWorldRotation();
 		FVector ArrowForwardVector = UKismetMathLibrary::GetForwardVector(ArrowWorldRotation);
 		FVector ArrowRightVector = UKismetMathLibrary::GetRightVector(ArrowWorldRotation);
