@@ -171,3 +171,5 @@
 | ------ | ------ |
 | 사용법 | [파쿠르 플러그인 사용법](https://lively-trumpet-bdf.notion.site/262ca40c46968183b8bdc79c3ca08ffc?source=copy_link) |
 | 제작서 | [파쿠르 플러그인 제작서](https://lively-trumpet-bdf.notion.site/262ca40c469681ae822be01e1a9e8ce0?source=copy_link) |
+| 다운로드 | [구글 드라이브](https://drive.google.com/file/d/1CAMlU3MRtEgmLgPrtlItTvtHa9PfYvPw/view?usp=sharing) |
+
