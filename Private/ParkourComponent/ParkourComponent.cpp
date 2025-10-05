@@ -14,6 +14,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Animations/ParkourAnimInstance.h"
 #include "DataAssets/ParkourPDA.h"
+#include "Engine/World.h"
 
 
 // Sets default values for this component's properties
@@ -84,6 +85,9 @@ void UParkourComponent::SetInitializeReference(ACharacter* Character, UCapsuleCo
 	ParkourStateTag = UPSFunctionLibrary::GetGameplayTag(FName(TEXT("Parkour.State.NotBusy")));
 	ParkourActionTag = UPSFunctionLibrary::GetGameplayTag(FName(TEXT("Parkour.Action.NoAction")));
 
+	// Initialize multiplayer assistance system
+	InitializeMultiplayerAssistance();
+
 #ifdef DEBUG_PARKOURCOMPONENT
 	if (!Character)
 		LOG(Error, TEXT("Chactcer NULL"));
@@ -105,9 +109,13 @@ void UParkourComponent::BeginPlay()
 void UParkourComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
 	TickInGround();
 	ClimbMovementIK();
+
+	// 멀티플레이어 협력 시스템: 자동으로 주변 플레이어 탐지
+	CheckForAssistanceOpportunities();
+
 	// ...
 }
 
@@ -1021,6 +1029,24 @@ void UParkourComponent::SetParkourState(FGameplayTag NewParkourState)
 			true,
 			false);
 	}
+	else if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.WaitingForAssist")))
+	{
+		// Similar to Climb state but with restricted movement
+		ParkourStateSettings(ECollisionEnabled::NoCollision,
+			EMovementMode::MOVE_Flying,
+			ParkourRotationRate_Climb,
+			true,
+			true);
+	}
+	else if (UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.ProvidingAssist")))
+	{
+		// Similar to NotBusy state but ready to provide assistance
+		ParkourStateSettings(ECollisionEnabled::QueryAndPhysics,
+			EMovementMode::MOVE_Walking,
+			ParkourRotationRate_Default,
+			true,
+			false);
+	}
 }
 
 /* Hand Location 또는 Spring Arm Component의 위치 및 길이 조절*/
@@ -1558,7 +1584,7 @@ void UParkourComponent::MontageLeftFootIK()
 			bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartPos, EndPos, 10.f, ParkourTraceType, false, TArray<AActor*>(), DDT_LeftClimbFootIK, ClimbFootHitResult, true);
 			if (bHit)
 			{
-				//찾아낸 Foot IK Location에서 사용자가 지정 할 수있는 BracedFootAddForward_Left 변수의 값까지 더하여 애님 인스턴스에 최종 위치 전달
+				//찾아낸 Foot IK Location에서 사용자가 지정 할 수있는 BracedFootAddThickness_Left 변수의 값까지 더하여 애님 인스턴스에 최종 위치 전달
 				FVector ClimbFootHitResult_ForwardVector = GetForwardVector(UPSFunctionLibrary::NormalizeDeltaRotator_Yaw(ClimbFootHitResult.ImpactNormal));
 				FVector LeftFootLocation = ClimbFootHitResult.ImpactPoint + (ClimbFootHitResult_ForwardVector * -BracedFootAddThickness_Left);
 				
@@ -2494,7 +2520,7 @@ void UParkourComponent::ClimbMovement()
 						else
 						{
 							#ifdef DEBUG_MOVEMENT
-								LOG(Warning, TEXT("StopClimbMovement 6"));
+								LOG(Warning, TEXT("StopClimbMovement_1"));
 							#endif
 
 							StopClimbMovement();
@@ -2503,7 +2529,7 @@ void UParkourComponent::ClimbMovement()
 					else
 					{
 						#ifdef DEBUG_MOVEMENT
-							LOG(Warning, TEXT("StopClimbMovement 7"));
+							LOG(Warning, TEXT("StopClimbMovement_2"));
 						#endif
 					}						
 				}
@@ -4056,4 +4082,740 @@ FVector UParkourComponent::GetCharacterRightVector()
 		UPSFunctionLibrary::CrashLog("OwnerChracter is NULL", "OwnerChracter is NULL");
 		return FVector(0.f, 0.f, 0.f);
 	}
+}
+
+/*---------------------------
+	Multiplayer Assistance
+	멀티플레이어 협력 클라이밍 시스템
+
+	시나리오:
+	1P: "이 벽 너무 높아서 혼자 못 올라가겠어!" → RequestAssistanceCallable() 호출
+	2P: "내가 도와줄게!" → ProvideAssistanceCallable(1P) 호출
+	결과: 1P가 2P의 도움으로 벽을 오를 수 있게 됨!
+-----------------------------*/
+
+/*
+	도움 요청하기 - RequestAssistanceCallable()
+
+	역할: 1P가 "나 도움이 필요해!"라고 외치는 함수
+
+	작동 과정:
+	1. 도움을 요청할 수 있는 상태인지 확인 (Climb 상태여야 함)
+	2. 주변에 도와줄 수 있는 플레이어가 있는지 찾기
+	3. 상태를 "도움 대기 중(WaitingForAssist)"으로 변경
+	4. 10초 타이머 시작 (타임아웃: 아무도 안 도와주면 자동 취소)
+
+	예시 상황:
+	- 1P가 벽에 매달려 있음 (Climb 상태)
+	- 혼자서는 못 올라가는 높은 벽
+	- 이 함수를 호출하면 "SOS 신호" 발동
+	- 화면에 "도움 대기 중..." UI 표시 가능
+*/
+void UParkourComponent::RequestAssistanceCallable()
+{
+	// 1단계: 도움을 요청할 수 있는 상태인지 확인
+	if (!bCanRequestAssistance || !UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.Climb")))
+	{
+		return; // 지금은 도움을 요청할 수 없음
+	}
+
+	// 2단계: 주변에 도와줄 수 있는 플레이어가 있는지 찾기
+	TArray<UParkourComponent*> NearbyPlayers = FindNearbyPlayersForAssistance();
+	if (NearbyPlayers.Num() == 0)
+	{
+		return; // 주변에 아무도 없음
+	}
+
+	// 3단계: 상태를 "도움 대기 중"으로 변경
+	SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.WaitingForAssist")));
+	CurrentInteractionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Interaction.ClimbAssist"));
+	bCanRequestAssistance = false;
+
+	// 4단계: 10초 타이머 시작 (10초 안에 아무도 안 도와주면 자동 취소)
+	GetWorld()->GetTimerManager().SetTimer(AssistanceTimeoutHandle, this, &UParkourComponent::OnAssistanceTimeout, AssistanceWaitTimeout, false);
+
+#ifdef DEBUG_PARKOURCOMPONENT
+	LOG(Warning, TEXT("RequestAssistanceCallable: Waiting for assistance"));
+#endif
+}
+
+/*
+	도와주기 - ProvideAssistanceCallable(PlayerNeedingHelp)
+
+	역할: 2P가 "내가 도와줄게!"하고 달려가는 함수
+
+	작동 과정:
+	1. 도와줄 수 있는지 확인 (상태, 거리 등)
+	2. 정말로 도와줘도 되는지 상세 검증 (높이 차이 등)
+	3. 서로를 기억하기 (1P와 2P 연결)
+	4. 협력 시작!
+
+	예시 상황:
+	- 2P가 1P 근처를 지나가다가 발견
+	- "도와주기" 버튼 표시
+	- 버튼을 누르면 이 함수 호출
+	- 2P가 1P를 끌어올리는 애니메이션 재생
+*/
+void UParkourComponent::ProvideAssistanceCallable(UParkourComponent* PlayerNeedingHelp)
+{
+	// 1단계: 도와줄 수 있는지 확인
+	if (!PlayerNeedingHelp || !CanPlayerProvideAssistance(PlayerNeedingHelp))
+	{
+		return; // 도와줄 수 없는 상황
+	}
+
+	// 2단계: 정말로 도와줘도 되는지 상세 검증
+	if (!ValidateAssistanceRequest(PlayerNeedingHelp))
+	{
+		return; // 조건이 안 맞음 (너무 멀거나, 높이 차이가 안 맞음)
+	}
+
+	// 3단계: 서로를 기억하기 (1P와 2P 연결)
+	PlayerBeingAssisted = PlayerNeedingHelp;
+	PlayerNeedingHelp->AssistingPlayer = this;
+
+	// 4단계: 협력 시작!
+	StartAssistanceSequence(PlayerNeedingHelp);
+
+#ifdef DEBUG_PARKOURCOMPONENT
+	LOG(Warning, TEXT("ProvideAssistanceCallable: Starting assistance"));
+#endif
+}
+
+/*
+	협력 취소 - CancelAssistanceCallable()
+
+	역할: "이제 안 도와줘도 돼!" 또는 "도움 필요 없어!" 취소 버튼
+
+	작동 과정:
+	1. 모든 타이머 정지
+	2. 연결된 플레이어들 정리
+	3. 상태 리셋
+
+	사용 예시:
+	- 1P: "다른 방법 찾았어, 취소!"
+	- 2P: "갑자기 몬스터 나타났어, 취소!"
+*/
+void UParkourComponent::CancelAssistanceCallable()
+{
+	// 모든 타이머 정지
+	GetWorld()->GetTimerManager().ClearTimer(AssistanceTimeoutHandle);
+	GetWorld()->GetTimerManager().ClearTimer(AssistanceDurationHandle);
+
+	// 연결된 플레이어들 정리
+	if (AssistingPlayer)
+	{
+		AssistingPlayer->PlayerBeingAssisted = nullptr;
+		AssistingPlayer->SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.NotBusy")));
+		AssistingPlayer = nullptr;
+	}
+
+	if (PlayerBeingAssisted)
+	{
+		PlayerBeingAssisted->AssistingPlayer = nullptr;
+		PlayerBeingAssisted = nullptr;
+	}
+
+	// 상태 리셋
+	SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.NotBusy")));
+	CurrentInteractionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Interaction.Available"));
+	bCanRequestAssistance = true;
+	bCanProvideAssistance = true;
+
+#ifdef DEBUG_PARKOURCOMPONENT
+	LOG(Warning, TEXT("CancelAssistanceCallable: Assistance cancelled"));
+#endif
+}
+
+/*
+	도와줄 수 있는지 확인 - CanPlayerProvideAssistance(OtherPlayer)
+
+	역할: 2P가 1P를 도와줄 수 있는 상태인지 빠르게 체크
+
+	체크 항목:
+	1. 상대방이 정말 도움을 기다리고 있나? (WaitingForAssist 상태)
+	2. 내가 지금 다른 일 하고 있지 않나? (NotBusy 상태)
+	3. 너무 멀리 떨어져 있지 않나? (거리 300cm 이내)
+
+	반환값:
+	- true: 도와줄 수 있음!
+	- false: 도와줄 수 없음
+*/
+bool UParkourComponent::CanPlayerProvideAssistance(UParkourComponent* OtherPlayer)
+{
+	if (!OtherPlayer || !bCanProvideAssistance)
+	{
+		return false;
+	}
+
+	// 체크 1: 상대방이 정말 도움을 기다리고 있나?
+	if (!UPSFunctionLibrary::CompGameplayTagName(OtherPlayer->ParkourStateTag, TEXT("Parkour.State.WaitingForAssist")))
+	{
+		return false; // 상대방이 도움을 기다리는 상태가 아님
+	}
+
+	// 체크 2: 내가 지금 다른 일 하고 있지 않나?
+	if (!UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.NotBusy")))
+	{
+		return false; // 나도 파쿠르 중이라 도와줄 수 없음
+	}
+
+	// 체크 3: 너무 멀리 떨어져 있지 않나?
+	if (!IsWithinAssistanceRange(OtherPlayer))
+	{
+		return false; // 거리 300cm 초과
+	}
+
+	return true; // 도와줄 수 있음!
+}
+
+/*
+	주변 플레이어 찾기 - FindNearbyPlayersForAssistance()
+
+	역할: "내 주변에 도와줄 사람 있나요?" 스캔하는 함수
+
+	작동 방식:
+	1. 게임 월드의 모든 캐릭터 검색
+	2. ParkourComponent가 있는지 확인
+	3. 거리 + 상태 조건 만족하는 사람들만 리스트에 추가
+
+	반환값:
+	- 도와줄 수 있는 플레이어들의 배열
+*/
+TArray<UParkourComponent*> UParkourComponent::FindNearbyPlayersForAssistance()
+{
+	TArray<UParkourComponent*> NearbyPlayers; // 결과 저장용 배열
+
+	if (!OwnerCharacter || !GetWorld())
+	{
+		return NearbyPlayers;
+	}
+
+	// 월드에 있는 모든 캐릭터를 순회
+	for (TActorIterator<ACharacter> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
+	{
+		ACharacter* OtherCharacter = *ActorIterator;
+
+		// 나 자신은 제외
+		if (!OtherCharacter || OtherCharacter == OwnerCharacter)
+		{
+			continue;
+		}
+
+		// ParkourComponent 가져오기
+		UParkourComponent* OtherParkourComponent = OtherCharacter->FindComponentByClass<UParkourComponent>();
+		if (!OtherParkourComponent)
+		{
+			continue;
+		}
+
+		// 조건 검사: 도와줄 수 있는 상태 + 거리 내 + 바쁘지 않음
+		if (OtherParkourComponent->bCanProvideAssistance &&
+			IsWithinAssistanceRange(OtherParkourComponent) &&
+			UPSFunctionLibrary::CompGameplayTagName(OtherParkourComponent->ParkourStateTag, TEXT("Parkour.State.NotBusy")))
+		{
+			NearbyPlayers.Add(OtherParkourComponent); // 발견!
+		}
+	}
+
+	return NearbyPlayers;
+}
+
+/*
+	거리 계산 - CalculateDistanceToPlayer(OtherPlayer)
+
+	역할: 두 플레이어 사이의 거리를 재는 자
+
+	계산 방식:
+	- 3D 공간에서 직선 거리 계산 (피타고라스 정리)
+
+	예시:
+	- 1P 위치: (0, 0, 200)
+	- 2P 위치: (100, 0, 100)
+	- 거리: √(100² + 0² + 100²) ≈ 141cm ✅ 협력 가능!
+*/
+float UParkourComponent::CalculateDistanceToPlayer(UParkourComponent* OtherPlayer)
+{
+	if (!OtherPlayer || !OtherPlayer->OwnerCharacter || !OwnerCharacter)
+	{
+		return -1.f;
+	}
+
+	// 내 위치
+	FVector ThisLocation = OwnerCharacter->GetActorLocation();
+
+	// 상대방 위치
+	FVector OtherLocation = OtherPlayer->OwnerCharacter->GetActorLocation();
+
+	// 3D 공간에서 직선 거리 계산
+	return FVector::Dist(ThisLocation, OtherLocation);
+}
+
+/*
+	거리 범위 검증 - IsWithinAssistanceRange(OtherPlayer)
+
+	역할: "가까이 있나요?" 간단 체크
+
+	판정:
+	- 거리 ≤ 300cm → ✅ true (도와줄 수 있음)
+	- 거리 > 300cm → ❌ false (너무 멀음)
+*/
+bool UParkourComponent::IsWithinAssistanceRange(UParkourComponent* OtherPlayer)
+{
+	float Distance = CalculateDistanceToPlayer(OtherPlayer);
+	return Distance >= 0.f && Distance <= MaxAssistanceDistance; // 기본 300cm
+}
+
+/*
+	요청 검증 - ValidateAssistanceRequest(RequestingPlayer)
+
+	역할: 진짜로 도와줘야 하는 상황인지 최종 확인
+
+	검증 항목:
+	1. 상대가 WaitingForAssist 상태인가?
+	2. 높이 차이 확인 (1P가 2P보다 위에 있어야 함)
+
+	예시:
+	- 1P 높이: 250cm (벽에 매달림)
+	- 2P 높이: 100cm (땅에 서 있음)
+	- 차이: 150cm ✅ 조건 만족! (기본 50cm 이상 필요)
+*/
+bool UParkourComponent::ValidateAssistanceRequest(UParkourComponent* RequestingPlayer)
+{
+	if (!RequestingPlayer)
+	{
+		return false;
+	}
+
+	// 조건 1: 상대가 WaitingForAssist 상태인가?
+	if (!UPSFunctionLibrary::CompGameplayTagName(RequestingPlayer->ParkourStateTag, TEXT("Parkour.State.WaitingForAssist")))
+	{
+		return false;
+	}
+
+	// 조건 2: 높이 차이 확인 (1P가 2P보다 위에 있어야 함)
+	if (OwnerCharacter && RequestingPlayer->OwnerCharacter)
+	{
+		float HeightDiff = RequestingPlayer->OwnerCharacter->GetActorLocation().Z
+		                 - OwnerCharacter->GetActorLocation().Z;
+
+		if (HeightDiff < AssistanceHeightDifference) // 기본 50cm
+		{
+			return false; // 높이 차이 부족
+		}
+	}
+
+	return true;
+}
+
+/*
+	협력 시작 - StartAssistanceSequence(AssistedPlayer)
+
+	역할: "자, 이제 진짜 도와줄게!" 협력 애니메이션 시작
+
+	작동 과정:
+	1. 2P 상태 변경 (도움 제공 중)
+	2. 타임아웃 타이머 정지 (이제 도움받고 있으니 취소 안 됨)
+	3. 협력 지속시간 타이머 시작 (3초)
+	4. 1P에게 "AssistedClimb" 애니메이션 재생 명령
+
+	타임라인:
+	T=0초: 함수 호출
+	T=0초: 2P "도움 제공 중" 상태
+	T=0초: 1P "AssistedClimb" 애니메이션 재생
+	T=3초: OnAssistanceComplete() 자동 호출
+*/
+void UParkourComponent::StartAssistanceSequence(UParkourComponent* AssistedPlayer)
+{
+	if (!AssistedPlayer)
+	{
+		return;
+	}
+
+	// 1단계: 2P 상태 변경 (도움 제공 중)
+	SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.ProvidingAssist")));
+	CurrentInteractionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Interaction.InProgress"));
+
+	// 2단계: 타임아웃 타이머 정지 (이제 도움받고 있으니 취소 안 됨)
+	GetWorld()->GetTimerManager().ClearTimer(AssistedPlayer->AssistanceTimeoutHandle);
+
+	// 3단계: 협력 지속시간 타이머 시작 (3초)
+	GetWorld()->GetTimerManager().SetTimer(AssistanceDurationHandle, this, &UParkourComponent::OnAssistanceComplete, AssistanceDuration, false);
+
+	// 4단계: 1P에게 "AssistedClimb" 애니메이션 재생 명령
+	AssistedPlayer->SetParkourAction(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Action.AssistedClimb")));
+	AssistedPlayer->PlayParkourMontage();
+}
+
+/*
+	협력 완료 - CompleteAssistanceSequence()
+
+	역할: "협력 끝! 이제 혼자 올라갈 수 있어!" 마무리
+
+	작동 과정:
+	1. 1P를 일반 Climb 상태로 전환 (이제 혼자 올라갈 수 있음)
+	2. 연결 해제
+	3. 2P를 원래 상태로 복귀
+
+	결과:
+	- 1P: Climb 상태 → 이제 정상적으로 벽을 오를 수 있음
+	- 2P: NotBusy 상태 → 다른 활동 가능
+*/
+void UParkourComponent::CompleteAssistanceSequence()
+{
+	if (PlayerBeingAssisted)
+	{
+		// 1P를 일반 Climb 상태로 전환 (이제 혼자 올라갈 수 있음)
+		PlayerBeingAssisted->SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.Climb")));
+
+		// 연결 해제
+		PlayerBeingAssisted->AssistingPlayer = nullptr;
+		PlayerBeingAssisted = nullptr;
+	}
+
+	// 2P를 원래 상태로 복귀
+	SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.NotBusy")));
+	CurrentInteractionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Interaction.Available"));
+	bCanProvideAssistance = true;
+}
+
+/*
+	타임아웃 콜백 - OnAssistanceTimeout()
+
+	역할: 타이머 만료 시 자동으로 호출되는 UFUNCTION
+
+	설명:
+	- RequestAssistanceCallable()에서 10초 타이머 설정
+	- 10초 후 자동으로 HandleAssistanceTimeout() 실행
+	- UFUNCTION 매크로가 필요하므로 비즈니스 로직은 HandleAssistanceTimeout()에 위임
+*/
+void UParkourComponent::OnAssistanceTimeout()
+{
+	// 실제 타임아웃 처리는 HandleAssistanceTimeout()에 위임
+	HandleAssistanceTimeout();
+}
+
+/*
+	협력 완료 콜백 - OnAssistanceComplete()
+
+	역할: 협력 지속시간(3초) 타이머가 끝나면 자동으로 호출되는 함수
+
+	설명:
+	- StartAssistanceSequence()에서 3초 타이머 설정
+	- 3초 후 자동으로 CompleteAssistanceSequence() 실행
+*/
+void UParkourComponent::OnAssistanceComplete()
+{
+	CompleteAssistanceSequence();
+
+#ifdef DEBUG_PARKOURCOMPONENT
+	LOG(Warning, TEXT("OnAssistanceComplete: Assistance completed successfully"));
+#endif
+}
+
+/*
+	주변 협력 기회 자동 탐지 - CheckForAssistanceOpportunities()
+
+	역할: 매 틱마다 주변에 도움이 필요한 플레이어를 자동으로 탐지하는 함수
+
+	작동 과정:
+	1. 쿨다운 체크 (0.2초마다 한 번만 실행 - 성능 최적화)
+	2. 현재 플레이어가 도와줄 수 있는 상태인지 확인 (NotBusy 상태여야 함)
+	3. 근처 플레이어들을 스캔 (FindNearbyPlayersForAssistance)
+	4. 각 플레이어가 정말 도움이 필요한지 체크 (IsPlayerInNeedOfAssistance)
+
+	최적화:
+	- 매 틱마다 실행하지 않고 0.2초마다만 실행 (성능 향상)
+	- 거리 필터링을 먼저 수행 (저렴한 연산)
+	- 상세 검증은 나중에 수행 (비싼 연산)
+
+	사용 예시:
+	- TickComponent()에서 자동으로 호출됨
+	- UI 힌트 시스템과 연동하여 "도와주기" 버튼 자동 표시 가능
+
+	주의사항:
+	- 이 함수는 자동 탐지만 수행
+	- 실제 협력 시작은 ProvideAssistanceCallable() 호출 필요
+*/
+void UParkourComponent::CheckForAssistanceOpportunities()
+{
+	/*
+		쿨다운 체크 (0.2초마다 한 번만 실행)
+
+		이유:
+		- 매 틱마다 실행하면 성능 낭비 (60 FPS = 1초에 60번 체크)
+		- 0.2초마다 실행하면 충분히 반응성 좋음 (1초에 5번 체크)
+	*/
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	if (CurrentTime - LastAssistanceCheckTime < 0.2f)
+	{
+		return; // 아직 0.2초가 안 지났으면 스킵
+	}
+	LastAssistanceCheckTime = CurrentTime;
+
+	/*
+		1단계: 나 자신이 도와줄 수 있는 상태인가?
+
+		조건:
+		- bCanProvideAssistance가 true여야 함
+		- NotBusy 상태여야 함 (다른 파쿠르 중이면 도와줄 수 없음)
+	*/
+	if (!bCanProvideAssistance ||
+		!UPSFunctionLibrary::CompGameplayTagName(ParkourStateTag, TEXT("Parkour.State.NotBusy")))
+	{
+		return; // 나는 지금 도와줄 수 없는 상태
+	}
+
+	/*
+		2단계: 근처 플레이어 스캔
+
+		FindNearbyPlayersForAssistance()는:
+		- 월드의 모든 캐릭터를 순회
+		- ParkourComponent를 가진 플레이어만 필터링
+		- 300cm 범위 내에 있는 플레이어만 반환
+	*/
+	TArray<UParkourComponent*> NearbyPlayers = FindNearbyPlayersForAssistance();
+
+	/*
+		3단계: 도움이 필요한 플레이어 찾기
+
+		가장 가까운 플레이어를 우선순위로 선택
+	*/
+	for (UParkourComponent* OtherPlayer : NearbyPlayers)
+	{
+		if (IsPlayerInNeedOfAssistance(OtherPlayer))
+		{
+			// 도움이 필요한 플레이어 발견!
+
+			#ifdef DEBUG_PARKOURCOMPONENT
+			float Distance = CalculateDistanceToPlayer(OtherPlayer);
+			LOG(Warning, TEXT("CheckForAssistanceOpportunities: Player in need found! Distance: %.1f"), Distance);
+			#endif
+
+			/*
+				여기서 UI 힌트를 표시할 수 있음 (향후 구현)
+				예: BP_ShowAssistancePrompt(OtherPlayer);
+			*/
+
+			// 한 명만 찾으면 충분 (가장 먼저 발견된 플레이어)
+			break;
+		}
+	}
+}
+
+/*
+	플레이어 도움 필요 여부 체크 - IsPlayerInNeedOfAssistance()
+
+	역할: 특정 플레이어가 실제로 도움이 필요한 상태인지 빠르게 판단
+
+	매개변수:
+	- OtherPlayer: 체크할 다른 플레이어의 ParkourComponent
+
+	반환값:
+	- true: 도움이 필요함 (WaitingForAssist 상태)
+	- false: 도움이 필요 없음
+
+	체크 항목 (빠른 → 느린 순서로 체크):
+	1. nullptr 체크 (가장 빠름)
+	2. 상태 체크 (빠름) - WaitingForAssist 상태인가?
+	3. 이미 도움받는 중인가? (빠름)
+	4. 인터랙션 가능한가? (빠름)
+	5. 거리 체크 (중간) - 300cm 이내인가?
+
+	ValidateAssistanceRequest()와의 차이:
+	- IsPlayerInNeedOfAssistance: 빠른 필터링 (매 0.2초마다 호출)
+	- ValidateAssistanceRequest: 상세 검증 (버튼 클릭 시 1회만 호출)
+
+	사용 예시:
+	- CheckForAssistanceOpportunities()에서 호출
+	- 매 0.2초마다 실행되므로 최대한 빠르게 처리
+*/
+bool UParkourComponent::IsPlayerInNeedOfAssistance(UParkourComponent* OtherPlayer)
+{
+	/*
+		1. nullptr 체크
+		가장 먼저 체크 (가장 빠른 연산)
+	*/
+	if (!OtherPlayer)
+	{
+		return false;
+	}
+
+	/*
+		2. 상태 체크: WaitingForAssist 상태인가?
+
+		다른 상태는 모두 도움이 필요 없음:
+		- NotBusy: 파쿠르 안 하는 중
+		- Climb: 일반 클라임 중 (아직 도움 요청 안 함)
+		- Mantle/Vault: 다른 파쿠르 중
+	*/
+	if (!UPSFunctionLibrary::CompGameplayTagName(
+		OtherPlayer->ParkourStateTag,
+		TEXT("Parkour.State.WaitingForAssist")))
+	{
+		return false; // WaitingForAssist 상태가 아니면 도움 필요 없음
+	}
+
+	/*
+		3. 이미 누군가 도와주고 있나?
+
+		AssistingPlayer가 nullptr이 아니면:
+		- 이미 다른 플레이어가 도와주는 중
+		- 더 이상 도움 필요 없음
+	*/
+	if (OtherPlayer->AssistingPlayer != nullptr)
+	{
+		return false; // 이미 도움받는 중
+	}
+
+	/*
+		4. 인터랙션 가능한가?
+
+		CurrentInteractionTag가 "Available"이어야 함:
+		- Available: 상호작용 가능
+		- InProgress: 이미 상호작용 중 (다른 플레이어와)
+	*/
+	if (!UPSFunctionLibrary::CompGameplayTagName(
+		OtherPlayer->CurrentInteractionTag,
+		TEXT("Parkour.Interaction.Available")))
+	{
+		return false; // 인터랙션 불가능
+	}
+
+	/*
+		5. 거리 체크 (빠른 필터링)
+
+		IsWithinAssistanceRange()는:
+		- CalculateDistanceToPlayer() 호출
+		- MaxAssistanceDistance(300cm)와 비교
+		- 거리가 멀면 도와줄 수 없음
+	*/
+	if (!IsWithinAssistanceRange(OtherPlayer))
+	{
+		return false; // 너무 멀리 있음
+	}
+
+	/*
+		모든 조건 통과!
+		이 플레이어는 도움이 필요함
+	*/
+	return true;
+}
+
+/*
+	스마트 타임아웃 처리 - HandleAssistanceTimeout()
+
+	역할: 타임아웃 발생 시 상황을 분석하고 적절하게 처리
+
+	호출 시점:
+	- OnAssistanceTimeout()에서 호출됨
+	- RequestAssistanceCallable() 호출 후 10초 경과 시
+
+	처리 시나리오:
+	1. 아무도 근처에 없었음 → 일반 복구 (Climb 상태로 복귀)
+	2. 협력 중 중단됨 → 재시도 기회 제공 (5초 연장)
+	3. 네트워크 문제 → 강제 정리
+
+	OnAssistanceTimeout()과의 차이:
+	- OnAssistanceTimeout: 단순 타이머 콜백 (UFUNCTION)
+	- HandleAssistanceTimeout: 복잡한 비즈니스 로직 처리
+
+	설계 패턴:
+	- Delegation Pattern (위임 패턴)
+	- OnAssistanceTimeout은 단순히 HandleAssistanceTimeout에 위임
+	- 타이머 콜백과 비즈니스 로직을 분리
+*/
+void UParkourComponent::HandleAssistanceTimeout()
+{
+	/*
+		타임아웃 이유 분석
+
+		현재는 단순 구현:
+		- 주변에 플레이어가 있는지만 체크
+
+		향후 확장 가능:
+		- enum class EAssistanceTimeoutReason 추가
+		- 더 복잡한 이유 분석 가능
+	*/
+	TArray<UParkourComponent*> NearbyPlayers = FindNearbyPlayersForAssistance();
+	bool bPlayersNearby = (NearbyPlayers.Num() > 0);
+
+	/*
+		시나리오 1: 아무도 근처에 없었음
+
+		결과:
+		- WaitingForAssist → Climb 상태로 복귀
+		- 다시 도움 요청 가능
+		- 일반적인 타임아웃 처리
+	*/
+	if (!bPlayersNearby)
+	{
+		// Climb 상태로 복귀
+		SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.Climb")));
+		CurrentInteractionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Interaction.Available"));
+		bCanRequestAssistance = true;
+
+		#ifdef DEBUG_PARKOURCOMPONENT
+		LOG(Warning, TEXT("HandleAssistanceTimeout: No players nearby - returning to Climb"));
+		#endif
+
+		return; // 처리 완료
+	}
+
+	/*
+		시나리오 2: 플레이어가 있었지만 도와주지 않음
+
+		이유:
+		- 2P가 SOS 신호를 못 봤을 수 있음
+		- 2P가 바쁜 상태였을 수 있음
+
+		처리:
+		- 기존과 동일하게 Climb 상태로 복귀
+		- 플레이어에게 다시 요청 기회 제공
+	*/
+	SetParkourState(UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.State.Climb")));
+	CurrentInteractionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Interaction.Available"));
+	bCanRequestAssistance = true;
+
+	#ifdef DEBUG_PARKOURCOMPONENT
+	LOG(Warning, TEXT("HandleAssistanceTimeout: Players nearby but no assistance provided"));
+	#endif
+
+	/*
+		향후 확장 가능 기능:
+
+		시나리오 3: 협력 중 중단됨 (미구현)
+		- WaitingForAssist 상태 유지
+		- 타이머 5초 연장
+		- "재시도 중..." UI 표시
+
+		시나리오 4: 네트워크 문제 (미구현)
+		- CancelAssistanceCallable() 호출
+		- 강제 정리
+		- 에러 로그 출력
+	*/
+}
+
+/*
+	멀티플레이어 협력 초기화 - InitializeMultiplayerAssistance()
+
+	역할: 협력 시스템의 모든 변수를 초기 상태로 설정
+
+	호출 시점:
+	- SetInitializeReference() 함수에서 컴포넌트 초기화 시 자동 호출
+
+	초기화 내용:
+	- 협력 관련 플레이어 참조 초기화
+	- 인터랙션 태그를 "Available"로 설정
+	- 도움 요청/제공 가능 상태로 설정
+*/
+void UParkourComponent::InitializeMultiplayerAssistance()
+{
+	// Initialize assistance variables
+	AssistingPlayer = nullptr;
+	PlayerBeingAssisted = nullptr;
+	CurrentInteractionTag = UPSFunctionLibrary::GetGameplayTag(TEXT("Parkour.Interaction.Available"));
+	bCanRequestAssistance = true;
+	bCanProvideAssistance = true;
+	LastAssistanceCheckTime = 0.f;
 }

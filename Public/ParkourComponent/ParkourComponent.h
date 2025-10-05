@@ -468,6 +468,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ParkourRotationRate")
 	FRotator ParkourRotationRate_ReachLedge = FRotator(0.f, 500.f, 0.f);
 
+	/*---------------------------
+		Multiplayer Assistance
+	-----------------------------*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MultiplayerAssistance")
+	float MaxAssistanceDistance = 300.f; // 도움 가능 거리 (cm)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MultiplayerAssistance")
+	float AssistanceWaitTimeout = 10.f; // 대기 타임아웃 (초)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MultiplayerAssistance")
+	float AssistanceDuration = 3.f; // 협력 지속시간 (초)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MultiplayerAssistance")
+	float AssistanceHeightDifference = 50.f; // 높이 차이 한계 (cm)
+
 	/*----------------------
 			Climb IK
 	------------------------*/
@@ -898,6 +913,32 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = GameplayTags, meta = (AllowPrivateAccess = "true"))
 	FGameplayTag ClimbDirectionTag;
 
+	/*---------------------------
+		Multiplayer Assistance
+	-----------------------------*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	class UParkourComponent* AssistingPlayer; // 나를 도와주는 플레이어
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	class UParkourComponent* PlayerBeingAssisted; // 내가 도와주는 플레이어
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	FGameplayTag CurrentInteractionTag; // 현재 상호작용 상태
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	bool bCanRequestAssistance; // 도움 요청 가능 여부
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	bool bCanProvideAssistance; // 도움 제공 가능 여부
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	FTimerHandle AssistanceTimeoutHandle; // 10초 타임아웃 타이머
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	FTimerHandle AssistanceDurationHandle; // 3초 지속시간 타이머
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MultiplayerAssistance", meta = (AllowPrivateAccess = "true"))
+	float LastAssistanceCheckTime; // 마지막 체크 시간 (0.2초 쿨다운용)
 
 /*-------------------------------------
 		Last IK Location
@@ -949,6 +990,24 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Parkour Callable")
 	void ParkourDropCallable();
+
+	/*---------------------------
+		Multiplayer Assistance
+	-----------------------------*/
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer Assistance")
+	void RequestAssistanceCallable(); // "도와줘!" SOS 신호 발신
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer Assistance")
+	void ProvideAssistanceCallable(class UParkourComponent* PlayerNeedingHelp); // "내가 도와줄게!" 협력 시작
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer Assistance")
+	void CancelAssistanceCallable(); // 협력 취소
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer Assistance")
+	bool CanPlayerProvideAssistance(class UParkourComponent* OtherPlayer); // 도와줄 수 있는지 체크
+
+	UFUNCTION(BlueprintCallable, Category = "Multiplayer Assistance")
+	TArray<class UParkourComponent*> FindNearbyPlayersForAssistance(); // 주변 플레이어 스캔
 
 	// Blueprint와 C++의 AddMovementInput을 연결해주는 인터페이스
 	UFUNCTION(BlueprintCallable, Category = "Movement Callable")
@@ -1002,9 +1061,59 @@ private:
 	void ResetParkourHitResult_Tick();
 	float GetFirstTraceHeight();
 
+	/*---------------------------
+		Multiplayer Assistance
+	-----------------------------*/
+	/*
+	  1. 현재 구현: Manual/Explicit 모드 (수동 명시적)
+
+		// 1P가 직접 버튼 클릭
+		RequestAssistanceCallable()
+
+		// 2P가 직접 버튼 클릭
+		ProvideAssistanceCallable(1P)
+
+		특징:
+		- 플레이어의 명시적인 입력 필요
+		- UI 버튼 클릭 기반
+		- 간단한 구현, 명확한 의도
+
+		---
+		2. 미구현: Automatic/Implicit 모드 (자동 암묵적)
+
+		// Tick에서 자동으로 호출 (선언만 존재)
+		CheckForAssistanceOpportunities()
+		↓
+		IsPlayerInNeedOfAssistance()
+		↓
+		HandleAssistanceTimeout()
+
+		특징:
+		- 시스템이 자동으로 기회 탐지
+		- UI 힌트 자동 표시 ("F키를 눌러 도와주세요!")
+		- 복잡한 구현, 스마트한 UX
+		---
+	*/
+
+	void CheckForAssistanceOpportunities(); // 0.2초마다 주변 자동 탐지
+	void HandleAssistanceTimeout(); // 타임아웃 시나리오 분석
+	bool IsPlayerInNeedOfAssistance(class UParkourComponent* OtherPlayer); // 도움 필요한지 빠른 체크
+
+	bool IsWithinAssistanceRange(class UParkourComponent* OtherPlayer); // 거리 체크 (≤300cm)
+	bool ValidateAssistanceRequest(class UParkourComponent* RequestingPlayer); // 상세 검증 (높이, 기하학)
+	void StartAssistanceSequence(class UParkourComponent* AssistedPlayer); // 협력 시작 (3초 타이머)
+	void CompleteAssistanceSequence(); // 협력 완료 처리
+	float CalculateDistanceToPlayer(class UParkourComponent* OtherPlayer); // 3D 거리 계산
+	void InitializeMultiplayerAssistance(); // 협력 시스템 초기화
+
+	UFUNCTION()
+	void OnAssistanceTimeout(); // 10초 타임아웃 콜백
+
+	UFUNCTION()
+	void OnAssistanceComplete(); // 3초 완료 콜백
 
 	/*-----------------------------------------
-			Set Parkour Action / State 
+			Set Parkour Action / State
 	-------------------------------------------*/
 	void SetParkourAction(FName NewParkourActionName); // 맞는 ParkourPDA를 가져옴
 	void SetParkourAction(FGameplayTag NewParkourActionTag); // 맞는 ParkourPDA를 가져옴
@@ -1209,8 +1318,6 @@ private:
 	FVector GetUpVector(FRotator Rotator);
 	FVector GetCharacterForwardVector();
 	FVector GetCharacterRightVector();
-
-
 
 
 };

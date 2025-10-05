@@ -57,6 +57,11 @@ namespace ParkourGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Action_ThinVault);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Action_Vault);
 	//-------------------
+	// Multiplayer Assistance
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Action_AssistedClimb);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Action_ProvideAssist);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Action_RequestAssist);
+	//-------------------
 	/* Climb Style */
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_ClimbStyle_Braced);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_ClimbStyle_FreeHang);
@@ -78,6 +83,13 @@ namespace ParkourGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_State_NotBusy);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_State_ReachLedge);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_State_Vault);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_State_WaitingForAssist);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_State_ProvidingAssist);
+	//-------------------
+	/* Multiplayer Interaction */
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Interaction_ClimbAssist);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Interaction_Available);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Parkour_Interaction_InProgress);
 	//-------------------
 }
 
@@ -123,6 +135,11 @@ enum class EParkourGameplayTagNames : uint8
 	Parkour_Action_Mantle UMETA(DisplayName = "Parkour.Action.Mantle"),
 	Parkour_Action_ThinVault UMETA(DisplayName = "Parkour.Action.ThinVault"),
 	Parkour_Action_Vault UMETA(DisplayName = "Parkour.Action.Vault"),
+
+	// Multiplayer Assistance
+	Parkour_Action_AssistedClimb UMETA(DisplayName = "Parkour.Action.AssistedClimb"),
+	Parkour_Action_ProvideAssist UMETA(DisplayName = "Parkour.Action.ProvideAssist"),
+	Parkour_Action_RequestAssist UMETA(DisplayName = "Parkour.Action.RequestAssist"),
 	
 	/* Climb Style */
 	Parkour_ClimbStyle_Braced UMETA(DisplayName = "Parkour.ClimbStyle.Braced"),
@@ -144,7 +161,14 @@ enum class EParkourGameplayTagNames : uint8
 	Parkour_State_Mantle UMETA(DisplayName = "Parkour.State.Mantle"),
 	Parkour_State_NotBusy UMETA(DisplayName = "Parkour.State.NotBusy"),
 	Parkour_State_ReachLedge UMETA(DisplayName = "Parkour.State.ReachLedge"),
-	Parkour_State_Vault UMETA(DisplayName = "Parkour.State.Vault")
+	Parkour_State_Vault UMETA(DisplayName = "Parkour.State.Vault"),
+	Parkour_State_WaitingForAssist UMETA(DisplayName = "Parkour.State.WaitingForAssist"),
+	Parkour_State_ProvidingAssist UMETA(DisplayName = "Parkour.State.ProvidingAssist"),
+
+	/* Multiplayer Interaction */
+	Parkour_Interaction_ClimbAssist UMETA(DisplayName = "Parkour.Interaction.ClimbAssist"),
+	Parkour_Interaction_Available UMETA(DisplayName = "Parkour.Interaction.Available"),
+	Parkour_Interaction_InProgress UMETA(DisplayName = "Parkour.Interaction.InProgress")
 };
 
 

@@ -37,6 +37,10 @@ namespace ParkourGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Action_Mantle, "Parkour.Action.Mantle", "Parkour Action Mantle");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Action_ThinVault, "Parkour.Action.ThinVault", "Parkour Action ThinVault");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Action_Vault, "Parkour.Action.Vault", "Parkour Action Vault");
+	// Multiplayer Assistance
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Action_AssistedClimb, "Parkour.Action.AssistedClimb", "Parkour Action AssistedClimb");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Action_ProvideAssist, "Parkour.Action.ProvideAssist", "Parkour Action ProvideAssist");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Action_RequestAssist, "Parkour.Action.RequestAssist", "Parkour Action RequestAssist");
 	
 	/* Climb Style */
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_ClimbStyle_Braced, "Parkour.ClimbStyle.Braced", "Parkour ClimbStyle Braced");
@@ -59,6 +63,13 @@ namespace ParkourGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_State_NotBusy, "Parkour.State.NotBusy", "Parkour State NotBusy");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_State_ReachLedge, "Parkour.State.ReachLedge", "Parkour State ReachLedge");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_State_Vault, "Parkour.State.Vault", "Parkour State Vault");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_State_WaitingForAssist, "Parkour.State.WaitingForAssist", "Parkour State WaitingForAssist");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_State_ProvidingAssist, "Parkour.State.ProvidingAssist", "Parkour State ProvidingAssist");
+
+	/* Multiplayer Interaction */
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Interaction_ClimbAssist, "Parkour.Interaction.ClimbAssist", "Parkour Interaction ClimbAssist");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Interaction_Available, "Parkour.Interaction.Available", "Parkour Interaction Available");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Parkour_Interaction_InProgress, "Parkour.Interaction.InProgress", "Parkour Interaction InProgress");
 }
 
 //#define LOCTEXT_NAMESPACE "FParkourSystemModule"
